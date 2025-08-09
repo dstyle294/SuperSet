@@ -71,7 +71,7 @@ export default function signup() {
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Lifter 123"
+                  placeholder="Lifter123"
                   placeholderTextColor={COLORS.placeholderText}
                   value={username}
                   onChangeText={setUsername}
