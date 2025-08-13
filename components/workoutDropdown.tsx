@@ -30,10 +30,17 @@ const renderSelectedItem = (item: WorkoutOption) => {
   )
 }
 
+interface WorkoutDropdownProps {
+  selectedWorkout: string,
+  onWorkoutChange: (workoutId: string) => void
+}
 
-export const WorkoutDropdown = () => {
+
+export const WorkoutDropdown: React.FC<WorkoutDropdownProps> = ({
+  selectedWorkout,
+  onWorkoutChange,
+}) => {
   const { workouts, loading, loadMore } = useWorkouts()
-  const [ selectedWorkout, setSelectedWorkout ] = useState()
 
   return (
     <Dropdown
@@ -48,7 +55,7 @@ export const WorkoutDropdown = () => {
       renderItem={renderItem}
       // renderSelectedItem={renderSelectedItem}
       onChange={item => {
-        setSelectedWorkout(item.id);
+        onWorkoutChange(item.id)
       }}
       maxHeight={200}        // Limit dropdown height to make it scrollable
       flatListProps={{       // Configure the internal FlatList
