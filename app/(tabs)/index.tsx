@@ -49,7 +49,7 @@ export default function Home() {
       if ( refreshing ) setRefreshing(true);
       else if ( pageNum === 1 ) setLoading(true);
 
-      const response = await fetch(`${API_URL}/posts?page=${pageNum}&limit=5`, {
+      const response = await fetch(`${API_URL}/posts?page=${pageNum}&limit=20`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`
@@ -92,9 +92,14 @@ export default function Home() {
    
       {item.media.length > 0 && item.media[0].type === 'image' ? (
       <View style={styles.postImageContainer}>
-        <Image source={item.media[0].url} style={styles.postImage} contentFit="cover" />
+        <Image source={{uri: item.media[0].url}} style={styles.postImage}/>
       </View>
       ) : <Text>skip</Text>}
+
+      <View style={styles.postDetails}>
+        <Text style={styles.postTitle}>{item.caption}</Text>
+        
+      </View>
 
     </View>
   )
