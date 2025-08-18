@@ -65,7 +65,6 @@ export const RenderUser = (post: postObj) => {
     
   }, [])
   
-  console.log(user)
 
   return (
     <View style={styles.userInfo}>
