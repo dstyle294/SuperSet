@@ -8,6 +8,7 @@ import { formatPublishDate } from '../../lib/utils'
 import COLORS from '@/constants/colors'
 import { Ionicons } from '@expo/vector-icons'
 import Loader from '../../components/loader'
+import { RenderWorkout } from '@/components/RenderWorkout'
 
 interface mediaObj {
   type: string,
@@ -64,7 +65,6 @@ export default function Home() {
 
       const data = await response.json()
 
-      console.log(data.posts.length)
 
       if (!response.ok) throw new Error(data.message || "Failed to fetch posts");
 
@@ -119,7 +119,7 @@ export default function Home() {
         <Text style={styles.postTitle}>{item.caption}</Text>
           <Text style={styles.date}>Shared on {formatPublishDate(item.created_at)}</Text>
       </View>
-
+      <RenderWorkout workoutId={item.workout} />
     </View>
   )
 
@@ -137,6 +137,7 @@ export default function Home() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerTitle}>SuperSet 🚀</Text>
+            <Text style={styles.headerSubtitle}>Scroll to see what the fitness world is up to... 👇</Text>
           </View>
         }
         ListEmptyComponent={

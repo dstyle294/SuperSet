@@ -35,7 +35,7 @@ const COLORS = {
 const COLORS = {
   primary: "#1976D2", 
   textPrimary: "#1a4971",
-  textSecondary: "#6d93b8", 
+  textSecondary: "#285075ff", 
   textDark: "#0d2b43", 
   placeholderText: "#767676",
   background: "#e3f2fd", 
@@ -44,6 +44,10 @@ const COLORS = {
   border: "#bbdefb",
   white: "#ffffff",
   black: "#000000",
+  badge: 'rgba(255, 255, 255, 0.2)', 
+  red: '#ef4444',
+  green: '#22c55e',
+  blue: '#3b82f6',
 };
 
 

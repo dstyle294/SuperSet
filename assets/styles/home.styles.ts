@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   postDetails: {
-    padding: 4,
+    
   },
   postTitle: {
     fontSize: 18,
