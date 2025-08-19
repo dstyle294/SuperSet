@@ -2,7 +2,7 @@ import styles from "@/assets/styles/workout.styles"
 import { API_URL } from "@/constants/api"
 import { useAuthStore } from "@/store/authStore"
 import { useEffect, useState } from "react"
-import { Text, View } from "react-native"
+import { Text, TouchableOpacity, View } from "react-native"
 import { StatCard } from "./StatCard"
 
 interface exerciseObj {
@@ -102,6 +102,7 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
   const { token } = useAuthStore()
   const [workout, setWorkout] = useState<workoutObj|null>(null)
   const [loading, setLoading] = useState<boolean>(true)
+  const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
     const response = fetch(`${API_URL}/workouts/${workoutId}`, {
@@ -179,6 +180,27 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
           value={workout.muscle_groups.length + workout.secondary_muscle_groups.length}
           label="Muscle groups"
         />
+      </View>
+
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        {['overview', 'exercises', 'details'].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[
+              styles.tab,
+              activeTab === tab && styles.activeTab
+            ]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text style={[
+              styles.tabText,
+              activeTab === tab && styles.activeTabText
+            ]}>
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   )
