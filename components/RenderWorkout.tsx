@@ -118,6 +118,20 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
                 {workout?.muscle_groups.map(({muscle}, index) => (
                   <Badge key={index} text={muscle} type="primary" />
                 ))}
+              {workout?.secondary_muscle_groups.map(({secondary_muscle}, index) => (
+                <Badge key={`sec-${index}`} text={secondary_muscle} type="secondary" />
+              ))}
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>🏋️ Equipment needed</Text>
+              </View>
+              <View style={styles.badgeContainer}>
+                {workout?.equipment_needed.map(({equipment}, index) => (
+                  <Badge key={index} text={equipment} type="equipment" />
+                ))}
               </View>
             </View>
           </View>

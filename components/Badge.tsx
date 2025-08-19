@@ -5,10 +5,9 @@ import { Text, View } from "react-native"
 interface BadgeProps {
   text: string,
   type: string,
-  style?: string,
 }
 
-export const Badge: React.FC<BadgeProps> = ({ text, type = 'default', style }) => {
+export const Badge: React.FC<BadgeProps> = ({ text, type = 'default'}) => {
   const getBadgeStyle = () => {
     switch (type) {
       case 'primary':
@@ -36,7 +35,7 @@ export const Badge: React.FC<BadgeProps> = ({ text, type = 'default', style }) =
   }
 
   return (
-    <View style={[styles.badge, getBadgeStyle(), style]}>
+    <View style={[styles.badge, getBadgeStyle()]}>
       <Text style={[styles.badgeText, getBadgeTextStyle()]}>{text}</Text>
     </View>
   )
