@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/authStore"
 import { useEffect, useState } from "react"
 import { Text, TouchableOpacity, View } from "react-native"
 import { StatCard } from "./StatCard"
+import { Badge } from "./Badge"
 
 interface exerciseObj {
   api_exercise_id: string,
@@ -104,6 +105,26 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [activeTab, setActiveTab] = useState('overview')
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <View style={styles.tabContent}>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>🎯 Target Muscles</Text>
+              </View>
+              <View style={styles.badgeContainer}>
+                {workout?.muscle_groups.map(({muscle}, index) => (
+                  <Badge key={index} text={muscle} type="primary" />
+                ))}
+              </View>
+            </View>
+          </View>
+        )
+    }
+  }
+
   useEffect(() => {
     const response = fetch(`${API_URL}/workouts/${workoutId}`, {
       method: 'GET',
@@ -202,6 +223,9 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* Tab Content */}
+      {renderTabContent()}
     </View>
   )
 }
