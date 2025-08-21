@@ -45,19 +45,27 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ( { exercise, index } )
             data={exercise.sets}
             keyExtractor={(set) => set._id}
             renderItem={({ item, index }) => (
-              <View style={styles.exerciseDetail}>
-                <Text>Set {index + 1}</Text>
-                <Text>Weight {item.weight ?? "-"}</Text>
-                <Text>{item.reps ? `${item.reps} reps` : "-"}</Text>
+              <View
+                key={item._id}
+                style={[
+                  styles.setItem,
+                  item.completed ? styles.completedSet : styles.pendingSet,
+                ]}
+              >
+                  <Text style={styles.setNumber}>Set {index + 1}</Text>
+                  <Text style={styles.setDetails}>
+                    {item.weight} kg × {item.reps}
+                  </Text>
+                  <Text style={styles.volumeText}>
+                    Volume: {item.weight * item.reps} kg
+                  </Text>
               </View>
             )}
           />
-        ) : (
+            ) : (
           <>
-            No sets :(
           </>
         )}
-          />
       </View>
       
     </View>
