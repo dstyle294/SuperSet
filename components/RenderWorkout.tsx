@@ -47,7 +47,7 @@ const formatDuration = (startTime: (string | undefined), total_duration: (number
   if (startTime == null) return ""
   if (total_duration != null) {
     const hours = Math.floor(total_duration / 3600)
-    const mins = (total_duration / 60) % 60
+    const mins = Math.floor((total_duration / 60) % 60)
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
   }
 
