@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
@@ -24,6 +24,7 @@ export default function Workout() {
   const [ workoutTime, setWorkoutTime ] = useState(0)
   const [ exercises, setExercises ] = useState<exerciseObj[]>([])
   const [ showAddExercise, setShowAddExercise ] = useState(false)
+  const [ newExerciseName, setNewExerciseName ] = useState("")
 
   useEffect(() => {
     let interval = 0
@@ -118,6 +119,23 @@ export default function Workout() {
     setWorkoutTime(0)
     setExercises([])
   }
+
+  const addExercise = () => {
+    if (newExerciseName.trim()) {
+      const newExercise = {
+        api_exercise_id: "0001",
+        sets: [],
+        _id: "Date.now()",
+        name: newExerciseName,
+        order: 0,
+        added_at: new Date(),
+        notes: "",
+      }
+      setExercises([...exercises, newExercise])
+      setNewExerciseName('')
+      setShowAddExercise(false)
+    }
+  }
   
   if (loading) return <Loader size="small" />
 
@@ -157,7 +175,7 @@ export default function Workout() {
 
           <View style={styles.timerContainer}>
               <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
-              <View style={workoutStyles.statusBadge}>
+              <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
                 <Text style={workoutStyles.statusText}>🔴</Text>
                 <Text style={workoutStyles.statusText}>in progress</Text>
               </View>
@@ -173,7 +191,7 @@ export default function Workout() {
 
               <TouchableOpacity 
                 style={styles.addExerciseButton}
-                onPress={() => setShowAddExercise(false)}
+                onPress={() => setShowAddExercise(true)}
               >
                 <Text style={styles.addExerciseText}>+ Add Exercise</Text>
               </TouchableOpacity>
@@ -197,7 +215,39 @@ export default function Workout() {
       )}
 
       {/* Add Exercise Modal */}
-      
+      <Modal
+        visible={showAddExercise}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAddExercise(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add Exercise</Text>
+            <TextInput  
+              style={styles.modalInput}
+              placeholder="Exercise name"
+              value={newExerciseName}
+              onChangeText={setNewExerciseName}
+              autoFocus
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowAddExercise(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={addExercise}
+              >
+                <Text style={styles.addButtonText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <FlatList
         data={workouts} 

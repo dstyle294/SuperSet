@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    paddingLeft: 10,
   },
   timerText: {
     fontSize: 24,
@@ -99,6 +101,8 @@ const styles = StyleSheet.create({
   },
   addExerciseButton: {
     paddingVertical: 12,
+    marginLeft: 10,
+    marginRight: 10,
     alignItems: 'center',
     backgroundColor: COLORS.white,
     borderRadius: 8,
@@ -119,6 +123,7 @@ const styles = StyleSheet.create({
   pauseButton: {
     flex: 1,
     backgroundColor: COLORS.orange,
+    marginLeft: 10,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -134,7 +139,65 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-  }
+    marginRight: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: COLORS.textDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 300,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.black,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: COLORS.inputBackground,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1, 
+    backgroundColor: COLORS.background,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: COLORS.textDark,
+    fontWeight: '500',
+  },
+  addButton: {
+    flex: 1,
+    backgroundColor: COLORS.textSecondary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: COLORS.white,
+    fontWeight: '500',
+  },
 })
 
 export default styles
