@@ -14,6 +14,7 @@ export interface exerciseObj {
   sets: workoutSet[],
   notes: String,
   added_at: {type: Date, default: null},
+  _id: string,
 }
 
 export interface workoutObj {

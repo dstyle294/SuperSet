@@ -48,6 +48,7 @@ const COLORS = {
   red: '#ef4444',
   green: '#22c55e',
   blue: '#3b82f6',
+  orange: '#FF9800',
 };
 
 
