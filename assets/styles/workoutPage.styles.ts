@@ -128,6 +128,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+  resumeButton: {
+    flex: 1,
+    backgroundColor: COLORS.blue,
+    marginLeft: 10,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
   controlButtonText: {
     color: COLORS.white,
     fontSize: 16,
