@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   listContainer: {
-    padding: 16,
+    padding: 10,
     paddingBottom: 80,
   },
   header: {
