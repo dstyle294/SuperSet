@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: COLORS.textDark,
+    marginBottom: 5,
   },
   exerciseDetails: {
     fontSize: 14,
@@ -161,7 +162,36 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     width: '100%',
-    maxWidth: 300,
+    maxWidth: 400,
+  },
+  modalInputBox: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    flexDirection: 'row',
+  },
+  modalInput: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingRight: 8,
+    fontSize: 16,
+    color: COLORS.textDark,
+  },
+  clearButton: {
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.lightGrey,
+    width: 24,
+    height: 24,
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: COLORS.textDark,
   },
   modalTitle: {
     fontSize: 18,
@@ -169,15 +199,6 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginBottom: 16,
     textAlign: 'center',
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: COLORS.inputBackground,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    marginBottom: 20,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -205,6 +226,39 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: COLORS.white,
     fontWeight: '500',
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: COLORS.textDark,
+  },
+  resultsSection: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.black,
+    marginBottom: 12,
+  },
+  exerciseCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    elevation: 1,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  exerciseInfo: {
+    flex: 1,
   },
 })
 
