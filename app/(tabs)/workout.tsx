@@ -181,7 +181,8 @@ export default function Workout() {
 
   const handleLoadMoreExercisesInSearch = async () => {
     if (searchHasMore && !searchLoading && !searchRefreshing) {
-      await searchExercises(page + 1, searchQuery, searchRefreshing)
+      console.log('here')
+      await searchExercises(searchPage + 1, searchQuery, searchRefreshing)
     }
   }
 
@@ -346,13 +347,18 @@ export default function Workout() {
   const searchExercises = async (pageNum = 1, query: string, searchRefreshing = false) => {
     if (!query.trim()) {
       setSearchResults([])
+      setIsSearching(false)
+      setSearchPage(1)
+      setSearchHasMore(false)
+      setSearchLoading(false)
       return ;
     }
 
     setIsSearching(true)
+    setSearchLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/exercises/name/${query}`, {
+      const response = await fetch(`${API_URL}/exercises/name/${query}?page=${pageNum}`, {
           method: 'GET',
         }
       )
@@ -361,20 +367,28 @@ export default function Workout() {
 
       if (!response.ok) throw new Error(data.message || "Something went wrong!")
 
-      console.log(data)
 
-      setSearchResults(data.exercises.data)
+      const uniqueExercises = 
+        searchRefreshing || pageNum === 1 
+          ? data.exercises.data
+          : Array.from(new Set([...searchResults, ...data.exercises.data].map((exercise) => exercise.exerciseId))).map((id) => 
+            [...searchResults, ...data.exercises.data].find((exercise) => exercise.exerciseId === id)
+          )
+        
+      console.log(uniqueExercises.length)
+      setSearchResults(uniqueExercises)
 
       // change backend to return page num, totalpages
 
-      setSearchHasMore(pageNum < data.totalPages)
-      setSearchPage(pageNum)
+      setSearchHasMore(data.exercises.pageNum < data.exercises.totalPages)
+      setSearchPage(data.exercises.pageNum)
 
         
     } catch (error) {
       console.error(`Error fetching exercises: ${error}`)
     } finally {
       setIsSearching(false)
+      setSearchLoading(false)
     }
   }
 
@@ -534,16 +548,39 @@ export default function Workout() {
                     showsVerticalScrollIndicator={true}
                     onEndReached={handleLoadMoreExercisesInSearch}
                     onEndReachedThreshold={0.1}
-                    ListEmptyComponent={
-                      <View style={homeStyles.emptyContainer}>
-                        <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
-                        <TouchableOpacity
-                          onPress={addNewExercise}
-                          style={styles.addButton}
-                        >
-                          <Text style={styles.addButtonText}>Add new exercise</Text>
-                        </TouchableOpacity>
-                      </View>
+                    ListEmptyComponent={() => {
+                      if (searchLoading) {
+                        return (
+                          <View style={homeStyles.emptyContainer}>
+                            <ActivityIndicator style={homeStyles.footerLoader} size="large" color={COLORS.primary} />
+                            <Text style={homeStyles.emptyText}>Searching exercises...</Text>
+                          </View>
+                        )
+                      } 
+                      return (
+                        <View style={homeStyles.emptyContainer}>
+                          <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
+                          <TouchableOpacity
+                            onPress={addNewExercise}
+                            style={styles.addButton}
+                          >
+                            <Text style={styles.addButtonText}>Add new exercise</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )
+                    }}
+                    ListFooterComponent={
+                      searchHasMore && searchResults.length > 0 ? (
+                        <ActivityIndicator style={homeStyles.footerLoader} size="small" color={COLORS.primary} />
+                      ) : null
+                    }
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => searchExercises(1, searchQuery)}
+                        colors={[COLORS.primary]}
+                        tintColor={COLORS.primary}
+                      />
                     }
                   />
                 ) : (
@@ -589,7 +626,7 @@ export default function Workout() {
             tintColor={COLORS.primary}
           />
         }
-        />
+      />
     </View>
   )
 }

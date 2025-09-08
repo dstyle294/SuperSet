@@ -235,6 +235,8 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: COLORS.white,
     fontWeight: '500',
+    fontSize: 16,
+    padding: 10,
   },
   loadingContainer: {
     padding: 20,
