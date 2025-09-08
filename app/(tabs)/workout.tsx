@@ -26,7 +26,7 @@ export default function Workout() {
   const [ isEditingTitle, setIsEditingTitle ] = useState(false)
   const [ workoutTitle, setWorkoutTitle ] = useState("")
   const [ workoutTime, setWorkoutTime ] = useState(0)
-  const [ exercises, setExercises ] = useState<exerciseObj[]>([])
+  const [ exercises, setExercises ] = useState<exerciseFromSearchObj[]>([])
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ newExerciseName, setNewExerciseName ] = useState("")
   const [ searchQuery, setSearchQuery ] = useState("")
@@ -40,7 +40,8 @@ export default function Workout() {
   const [ shouldResume, setShouldResume ] = useState(false)
   const [ renderTrigger, setRenderTrigger ] = useState(0)
   const [ searchLoading, setSearchLoading ] = useState(true)
-  
+  const [ selectedExerciseId, setSelectedExerciseId ] = useState("")
+   
 
   useEffect(() => {
     let interval = 0
@@ -173,9 +174,22 @@ export default function Workout() {
     }
   }
 
+
   const renderExerciseInSearch = ({ item } : { item: exerciseFromSearchObj }) => {
+    const thisIsSelected = item.exerciseId === selectedExerciseId 
+
     return (
-      <RenderExerciseInSearch exercise={item} />
+      <TouchableOpacity
+        onPress={() => {
+          if (selectedExerciseId === item.exerciseId) {
+            setSelectedExerciseId("")
+          } else {
+            setSelectedExerciseId(item.exerciseId)
+          }
+        }}
+      >
+        <RenderExerciseInSearch exercise={item} isSelected={thisIsSelected} />
+      </TouchableOpacity>
     )
   }
 
@@ -187,7 +201,28 @@ export default function Workout() {
   }
 
   const addNewExercise = async () => {
+    if (newExerciseName.trim()) {
+      const newExercise = {
+        api_exercise_id: "0001",
+        sets: [],
+        _id: "Date.now()",
+        name: newExerciseName,
+        order: exercises.length + 1,
+        added_at: new Date(),
+        notes: "",
+      }
+      setExercises([...exercises, newExercise])
+      setNewExerciseName('')
+      setShowAddExercise(false)
+    }
+  }
 
+  const addExercise = async () => {
+    const exercise = await fetch(`${API_URL}/exercises/id/${selectedExerciseId}`, {
+      method: 'GET',
+    })
+    setExercises([...exercises, exercise])
+    setShowAddExercise(false)
   }
 
   const pauseWorkout = async () => {
@@ -311,22 +346,7 @@ export default function Workout() {
     
   }
 
-  const addExercise = () => {
-    if (newExerciseName.trim()) {
-      const newExercise = {
-        api_exercise_id: "0001",
-        sets: [],
-        _id: "Date.now()",
-        name: newExerciseName,
-        order: exercises.length + 1,
-        added_at: new Date(),
-        notes: "",
-      }
-      setExercises([...exercises, newExercise])
-      setNewExerciseName('')
-      setShowAddExercise(false)
-    }
-  }
+  
 
   const timeoutRef = useRef<number | null>(null)
 
@@ -374,11 +394,10 @@ export default function Workout() {
           : Array.from(new Set([...searchResults, ...data.exercises.data].map((exercise) => exercise.exerciseId))).map((id) => 
             [...searchResults, ...data.exercises.data].find((exercise) => exercise.exerciseId === id)
           )
+      console.log(uniqueExercises)
         
       console.log(uniqueExercises.length)
       setSearchResults(uniqueExercises)
-
-      // change backend to return page num, totalpages
 
       setSearchHasMore(data.exercises.pageNum < data.exercises.totalPages)
       setSearchPage(data.exercises.pageNum)
@@ -514,7 +533,7 @@ export default function Workout() {
                       setSearchQuery('')
                       setSearchResults([])
                     }}
-                    style={styles.closeButton}
+                    style={[styles.headerButton, { borderColor: COLORS.red } ]}
                   >
                     <Ionicons name="close" size={20} color={COLORS.red} />
                   </TouchableOpacity>
@@ -586,6 +605,19 @@ export default function Workout() {
                 ) : (
                   null
                 )}
+                {selectedExerciseId.length > 0 && 
+                  <View style={{justifyContent: 'flex-end', flex: 1, flexDirection: 'row', padding: 20, paddingRight: 3 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowAddExercise(false)
+                        addExercise()
+                      }}
+                      style={[styles.footerButton, { borderColor: COLORS.blue }]}
+                    >
+                      <Ionicons name="add" color={COLORS.blue} size={20} />
+                    </TouchableOpacity>
+                  </View>
+                }
                 
               </View>
             </View>
