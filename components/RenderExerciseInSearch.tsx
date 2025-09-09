@@ -19,13 +19,17 @@ const showInformation = () => {
 export const RenderExerciseInSearch: React.FC<RenderExerciseInSearchProps> = ( { exercise, isSelected } ) => {
   return (
     <View style={[styles.exerciseCard, isSelected && styles.selectedExerciseCard]}>
-      <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text style={styles.exerciseName}>{capitalizeFirstLetter(exercise.name)}</Text>
+      <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+        <Text style={styles.exerciseName} numberOfLines={1} ellipsizeMode="tail" >{capitalizeFirstLetter(exercise.name)}</Text>
         <Ionicons
           name="information"
           size={22}
           color="gray"
           onPress={() => showInformation}
+          style={{
+            borderWidth: 2,
+            borderColor: "gray",
+          }}
         />
       </View>
       <Text style={styles.exerciseDetails}>Target: {exercise.targetMuscles[0]}</Text>
