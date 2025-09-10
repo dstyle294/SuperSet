@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   titleContainer: {
-    flex: 1,
+    // flex: 1,
+    justifyContent: 'center',
   },
   activeWorkoutTitle: {
     fontSize: 22,
@@ -164,6 +165,24 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
   },
+  informationModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    paddingVertical: 80,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  informationModalContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 300,
+  },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -283,6 +302,17 @@ const styles = StyleSheet.create({
   selectedExerciseCard: {
     backgroundColor: COLORS.green,
   },
+  gif: {
+    width: 200,
+    height: 200,
+  },
+  informationHeading: {
+    fontSize: 24,
+    justifyContent: 'center',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: COLORS.textSecondary,
+  }
 })
 
 export default styles

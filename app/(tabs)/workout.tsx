@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert, SafeAreaView } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert, SafeAreaView, Image } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
@@ -14,6 +14,8 @@ import { formatTime } from '@/lib/utils'
 import { RenderExerciseInSearch } from '@/components/RenderExerciseInSearch'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import SafeScreen from '@/components/SafeScreen'
+import { DetailRow } from '@/components/DetailRow'
+import { ExerciseInstructions } from '@/components/ExerciseInstructions'
 
 export default function Workout() {
   const { token } = useAuthStore()
@@ -41,7 +43,21 @@ export default function Workout() {
   const [ renderTrigger, setRenderTrigger ] = useState(0)
   const [ searchLoading, setSearchLoading ] = useState(true)
   const [ selectedExerciseId, setSelectedExerciseId ] = useState("")
+  const [ informationId, setInformationId ] = useState("")
+  const [ informationExercise, setInformationExercise ] = useState<exerciseFromSearchObj>()
+  const [ gifLoading, setGifLoading ] = useState(false)
    
+
+  useEffect(() => {
+    const fetchExercise = async () => {
+      if (informationId) {
+        const exercise = await getImageSource(informationId)
+        setInformationExercise(exercise.data)
+      }
+    }
+
+    fetchExercise()
+  }, [informationId])
 
   useEffect(() => {
     let interval = 0
@@ -69,6 +85,18 @@ export default function Workout() {
           : workout
       )
     )
+  }
+
+  const arrayToString = (array: string[]) => {
+    let string = ""
+    array.forEach(element => {
+      string += ", "
+      string += capitalizeFirstLetter(element)
+    })
+
+    string = string.slice(2, string.length)
+
+    return string
   }
 
 
@@ -174,6 +202,10 @@ export default function Workout() {
     }
   }
 
+  const capitalizeFirstLetter = (exerciseName: string) => {
+    return exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)
+  }
+
 
   const renderExerciseInSearch = ({ item } : { item: exerciseFromSearchObj }) => {
     const thisIsSelected = item.exerciseId === selectedExerciseId 
@@ -188,7 +220,7 @@ export default function Workout() {
           }
         }}
       >
-        <RenderExerciseInSearch exercise={item} isSelected={thisIsSelected} />
+        <RenderExerciseInSearch exercise={item} isSelected={thisIsSelected} setInformationId={setInformationId} />
       </TouchableOpacity>
     )
   }
@@ -363,6 +395,24 @@ export default function Workout() {
       searchExercises(searchPage, query, searchRefreshing)
     }, 500)
   }, [])
+
+  const getImageSource = async (id: string) => {
+    try { 
+      const response = await fetch(`${API_URL}/exercises/id/${id}`, {
+        method: 'GET',
+      })
+
+      const data = await response.json()
+
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong")
+
+      return data.exercise
+    } catch (error) {
+      console.log("Error fetching exercise", error)
+      return null
+    }
+  }
 
   const searchExercises = async (pageNum = 1, query: string, searchRefreshing = false) => {
     if (!query.trim()) {
@@ -621,9 +671,69 @@ export default function Workout() {
                 
               </View>
             </View>
+            <Modal
+              visible={informationId !== ""}
+              animationType="slide" 
+              transparent={true} 
+            >
+              <View style={styles.informationModalOverlay}>
+                <View style={styles.informationModalContent}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setInformationId("")
+                        setInformationExercise(null)
+                      }}
+                      style={[styles.headerButton, { borderColor: COLORS.gray }]}
+                    >
+                      <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
+                    </TouchableOpacity>
+                  </View>
+                  {informationExercise && (
+                    <View>
+                      <View style={styles.gif}>
+                        {/* {gifLoading ? (
+                          <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
+                        ) : null} */}
+                        <Image 
+                          source={{ uri: informationExercise.gifUrl }}
+                          style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
+                          onLoadStart={() => setGifLoading(true)}
+                          onLoad={() => setGifLoading(false)}
+                          onError={() => setGifLoading(false)}
+                        />
+                      </View>
+                      <View style={workoutStyles.tabContent}>
+                        <View style={styles.titleContainer}>
+                          <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
+                        </View>
+                        <ExerciseInstructions instructions={informationExercise.instructions} />
+                        <DetailRow
+                          label="Body Parts"
+                          value={arrayToString(informationExercise.bodyParts)}
+                        />
+                        <DetailRow
+                          label="Target Muscles"
+                          value={arrayToString(informationExercise.targetMuscles)}
+                        />
+                        <DetailRow
+                          label="Secondary Muscles"
+                          value={arrayToString(informationExercise.secondaryMuscles)}
+                        />
+                      </View>
+                    </View>
+                  )}
+                  
+                </View>
+              </View>
+            </Modal>
           </SafeScreen>
         </SafeAreaProvider>
       </Modal>
+
+      {/* Info of exercise Modal */} 
+      
+
       <FlatList
         data={workouts} 
         renderItem={renderWorkout}

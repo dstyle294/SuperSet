@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   toggleText: {
-    fontSize: 14,
+    fontSize: 16,
     color: COLORS.placeholderText
   },
   toggleView: {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   setItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -266,6 +266,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderColor: '#E0E0E0',
   },
+  circle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.blue,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  boldText: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: 'white',
+  }
 })
 
 export default styles

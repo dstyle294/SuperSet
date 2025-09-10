@@ -1,22 +1,21 @@
 import { exerciseFromSearchObj } from "@/app/types/workout.types"
 import styles from "@/assets/styles/workoutPage.styles"
 import { Ionicons } from "@expo/vector-icons"
+import { useState } from "react"
 import { Text, View } from "react-native"
 
 interface RenderExerciseInSearchProps {
   exercise: exerciseFromSearchObj,
   isSelected: boolean,
+  setInformationId: (exerciseId: string) => void,
 }
 
 const capitalizeFirstLetter = (exerciseName: string) => {
   return exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)
 }
 
-const showInformation = () => {
-  
-}
 
-export const RenderExerciseInSearch: React.FC<RenderExerciseInSearchProps> = ( { exercise, isSelected } ) => {
+export const RenderExerciseInSearch: React.FC<RenderExerciseInSearchProps> = ( { exercise, isSelected, setInformationId } ) => {
   return (
     <View style={[styles.exerciseCard, isSelected && styles.selectedExerciseCard]}>
       <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
@@ -25,7 +24,7 @@ export const RenderExerciseInSearch: React.FC<RenderExerciseInSearchProps> = ( {
           name="information"
           size={22}
           color="gray"
-          onPress={() => showInformation}
+          onPress={() => setInformationId(exercise.exerciseId)}
           style={{
             borderWidth: 2,
             borderColor: "gray",
