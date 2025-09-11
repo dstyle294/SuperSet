@@ -33,27 +33,31 @@ export const ExerciseInstructions: React.FC<ExerciseInstructionsProps> = ({ inst
         )}
 
         {isExpanded && (
-          <FlatList
-            data={instructions}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => (
-              <View
-                key={index.toString()}
-                style={[styles.setItem, {
-                  borderWidth: 0,
-                  backgroundColor: COLORS.lighterGrey,
-                  margin: 4,
-                  flex: 1,
-                  padding: 5,
-                }]}
-              >
-                <View style={[styles.circle, {padding: 5}]}>
-                  <Text style={[styles.boldText]}>{index + 1}</Text>
-                </View>
-                <Text style={{ flex: 1, marginLeft: 8 }}>{item.slice(7)}</Text>
-              </View>
-            )}
-          />
+          <View>
+            
+          </View>
+
+          // <FlatList
+          //   data={instructions}
+          //   keyExtractor={(item, index) => index.toString()}
+          //   renderItem={({ item, index }) => (
+          //     <View
+          //       key={index.toString()}
+          //       style={[styles.setItem, {
+          //         borderWidth: 0,
+          //         backgroundColor: COLORS.lighterGrey,
+          //         margin: 4,
+          //         flex: 1,
+          //         padding: 5,
+          //       }]}
+          //     >
+          //       <View style={[styles.circle, {padding: 5}]}>
+          //         <Text style={[styles.boldText]}>{index + 1}</Text>
+          //       </View>
+          //       <Text style={{ flex: 1, marginLeft: 8 }}>{item.slice(7)}</Text>
+          //     </View>
+          //   )}
+          // />
         )}
       </TouchableOpacity>
     </View>

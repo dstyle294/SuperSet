@@ -1,9 +1,9 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert, SafeAreaView, Image } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert, SafeAreaView, Image, ScrollView } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
 import { useAuthStore } from '@/store/authStore'
-import { exerciseFromSearchObj, exerciseObj, workoutObj } from '../types/workout.types'
+import { exerciseFromSearchObj, exerciseObj, workoutObj, workoutSet } from '../types/workout.types'
 import { RenderWorkout } from '@/components/RenderWorkout'
 import { Ionicons } from '@expo/vector-icons'
 import Loader from '@/components/loader'
@@ -16,6 +16,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import SafeScreen from '@/components/SafeScreen'
 import { DetailRow } from '@/components/DetailRow'
 import { ExerciseInstructions } from '@/components/ExerciseInstructions'
+import { RenderWorkoutPage } from '@/components/RenderWorkoutPage'
 
 export default function Workout() {
   const { token } = useAuthStore()
@@ -46,6 +47,7 @@ export default function Workout() {
   const [ informationId, setInformationId ] = useState("")
   const [ informationExercise, setInformationExercise ] = useState<exerciseFromSearchObj>()
   const [ gifLoading, setGifLoading ] = useState(false)
+  const [ activeTab, setActiveTab ] = useState(isWorkoutActive ? 'workout' : 'history')
    
 
   useEffect(() => {
@@ -157,6 +159,36 @@ export default function Workout() {
     )
   }
 
+  const renderSet = ({ item } : { item: workoutSet }) => {
+    return (
+      <View style={styles.setContainer}>
+        <Text style={styles.setNumber}>Set {item.set_number}</Text>
+        {/* <TextInput
+          style={styles.setInputBox}
+        >
+
+        </TextInput> */}
+      </View>
+    )
+  }
+
+  const renderExercise = ({ item } : { item: exerciseObj}) => {
+    const completedSets = item.sets.filter(set => set.completed === true).length
+    return (
+      <View style={styles.liveExercisesContainer}>
+        <View key={item._id} style={styles.exerciseItem}>
+          <Text style={styles.exerciseName}>{capitalizeFirstLetter(item.name)}</Text>
+          <Text style={styles.exerciseDetails}>{completedSets} of {item.sets.length} sets completed</Text>
+        </View>
+        {item.sets.map((item) => (
+          <View key={item._id}>
+            {renderSet({item})}
+          </View>
+        ))}
+      </View>
+    )
+  }
+
   const getWorkouts = async (pageNum = 1, refreshing = false) => {
     try {
       if ( refreshing ) setRefreshing(true)
@@ -232,6 +264,10 @@ export default function Workout() {
     }
   }
 
+  const addNewSet = (item: exerciseObj) => {
+
+  }
+
   const addNewExercise = async () => {
     if (newExerciseName.trim()) {
       const newExercise = {
@@ -261,7 +297,7 @@ export default function Workout() {
 
       const exercise = {
         exerciseId: selectedExerciseId,
-        sets: [],
+        sets: [{ set_number: 1, reps: null, weight: null, completed: false, notes: "" }],
         name: data.exercise.name,
         order: exercises.length + 1,
         updated_at: new Date(),
@@ -505,308 +541,321 @@ export default function Workout() {
   
 
   return (
-    
     <View style={styles.container}>
-      {!isWorkoutActive ? (
-        <View style={styles.startWorkoutContainer}>
-          <Text style={styles.startWorkoutTitle}>Ready to crush it?</Text>
-          <TouchableOpacity onPress={startWorkout} style={styles.startButton}>
-            <Text style={styles.startButtonText}>🔥 Start workout!</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.activeWorkoutContainer}>
-          <View style={styles.workoutHeader}>
-            <TouchableOpacity 
-              onPress={() => setIsEditingTitle(true)}
-              style={styles.titleContainer}
-            >
-              {isEditingTitle ? (
-                <TextInput
-                  style={styles.titleInput}
-                  value={workoutTitle}
-                  onChangeText={setWorkoutTitle}
-                  onBlur={() => setIsEditingTitle(false)}
-                  autoFocus
-                />
-              ) : (
-                <Text style={styles.activeWorkoutTitle}>{workoutTitle}</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.photoButton}>
-              <Text style={styles.photoButtonText}>📸</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.timerContainer}>
-              <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
-              <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
-                {!paused ? (
-                  <>
-                    <Text style={workoutStyles.statusText}>🔴</Text>
-                    <Text style={workoutStyles.statusText}>in progress</Text>
-                  </>
-                ) : (
-                  <>
-                    <Text style={workoutStyles.statusText}>⏸️</Text>
-                    <Text style={workoutStyles.statusText}>paused</Text>
-                  </>
-                )}
-                
-              </View>
-          </View>
-
-          <View style={styles.exercisesList}>
-              <FlatList 
-                data={exercises}
-                
-              {exercises.map(exercise => (
-                <View key={exercise._id} style={styles.exerciseItem}>
-                  <Text style={styles.exerciseName}>{exercise.name}</Text>
-                  <Text style={styles.exerciseDetails}>{exercise.sets.length} sets</Text>
-                </View>
-              ))}
-
-              <TouchableOpacity 
-                style={styles.addExerciseButton}
-                onPress={() => setShowAddExercise(true)}
-              >
-                <Text style={styles.addExerciseText}>+ Add Exercise</Text>
+      <RenderWorkoutPage />
+      {/* <View style={workoutStyles.tabContainer}>
+        <TouchableOpacity
+          style={[workoutStyles.tab, activeTab === 'workout' && workoutStyles.activeTab]}
+          onPress={() => setActiveTab('workout')}
+        >
+          <Text style={workoutStyles.activeTabText}>Active Workout</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[workoutStyles.tab, activeTab === 'history' && workoutStyles.activeTab]}
+          onPress={() => setActiveTab('history')}
+        >
+          <Text style={workoutStyles.activeTabText}>History</Text>
+        </TouchableOpacity>
+        <View style={styles.container}>
+          {!isWorkoutActive ? (
+            <View style={styles.startWorkoutContainer}>
+              <Text style={styles.startWorkoutTitle}>Ready to crush it?</Text>
+              <TouchableOpacity onPress={startWorkout} style={styles.startButton}>
+                <Text style={styles.startButtonText}>🔥 Start workout!</Text>
               </TouchableOpacity>
-          </View>
-
-          <View style={styles.workoutControls}>
-              {!paused ? (
-                <TouchableOpacity
-                  style={styles.pauseButton}
-                  onPress={pauseWorkout}
-                >
-                  <Text style={styles.controlButtonText}>⏸️ Pause</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={styles.resumeButton}
-                  onPress={resumeWorkout}
-                >
-                <Text style={styles.controlButtonText}>▶️ Resume</Text>
-              </TouchableOpacity>
-              )}
-              
-              <TouchableOpacity
-                style={styles.endButton}
-                onPress={endWorkout}
-              >
-                <Text style={styles.controlButtonText}>🏁 End Workout</Text>
-              </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      {/* Add Exercise Modal */}
-      <Modal
-        visible={showAddExercise}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowAddExercise(false)}
-      >
-        <SafeAreaProvider>
-          <SafeScreen>
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Add Exercise</Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setShowAddExercise(false)
-                      setSearchQuery('')
-                      setSearchResults([])
-                    }}
-                    style={[styles.headerButton, { borderColor: COLORS.red } ]}
-                  >
-                    <Ionicons name="close" size={20} color={COLORS.red} />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.modalInputBox}>
-                  <TextInput  
-                    style={styles.modalInput}
-                    placeholder="Search exercises (e.g. push up)"
-                    value={searchQuery}
-                    onChangeText={handleSearchInput}
-                    autoFocus
-                  />
-                  {searchQuery.length > 0 && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSearchQuery('')
-                        setSearchResults([])
-                      }}
-                      style={styles.clearButton}
-                    >
-                      <Ionicons name="close" size={16} color={COLORS.textDark} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                {searchQuery.length > 0 ? (
-                  <FlatList 
-                    data={searchResults}
-                    renderItem={renderExerciseInSearch}
-                    keyExtractor={(item: exerciseFromSearchObj) => item.exerciseId}
-                    contentContainerStyle={homeStyles.listContainer}
-                    showsVerticalScrollIndicator={true}
-                    onEndReached={handleLoadMoreExercisesInSearch}
-                    onEndReachedThreshold={0.1}
-                    ListEmptyComponent={() => {
-                      if (searchLoading) {
-                        return (
-                          <View style={homeStyles.emptyContainer}>
-                            <ActivityIndicator style={homeStyles.footerLoader} size="large" color={COLORS.primary} />
-                            <Text style={homeStyles.emptyText}>Searching exercises...</Text>
-                          </View>
-                        )
-                      } 
-                      return (
-                        <View style={homeStyles.emptyContainer}>
-                          <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
-                          <TouchableOpacity
-                            onPress={addNewExercise}
-                            style={styles.addButton}
-                          >
-                            <Text style={styles.addButtonText}>Add new exercise</Text>
-                          </TouchableOpacity>
-                        </View>
-                      )
-                    }}
-                    ListFooterComponent={
-                      searchHasMore && searchResults.length > 0 ? (
-                        <ActivityIndicator style={homeStyles.footerLoader} size="small" color={COLORS.primary} />
-                      ) : null
-                    }
-                    refreshControl={
-                      <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => searchExercises(1, searchQuery)}
-                        colors={[COLORS.primary]}
-                        tintColor={COLORS.primary}
-                      />
-                    }
-                  />
-                ) : (
-                  null
-                )}
-                {selectedExerciseId.length > 0 && 
-                  <View style={{justifyContent: 'flex-end', flex: 1, flexDirection: 'row', padding: 20, paddingRight: 3 }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setShowAddExercise(false)
-                        addExercise()
-                      }}
-                      style={[styles.footerButton, { borderColor: COLORS.blue }]}
-                    >
-                      <Ionicons name="add" color={COLORS.blue} size={20} />
-                    </TouchableOpacity>
-                  </View>
-                }
-                
-              </View>
             </View>
-            <Modal
-              visible={informationId !== ""}
-              animationType="slide" 
-              transparent={true} 
-            >
-              <View style={styles.informationModalOverlay}>
-                <View style={styles.informationModalContent}>
-                  <View style={styles.modalHeader}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setInformationId("")
-                        setInformationExercise(null)
-                      }}
-                      style={[styles.headerButton, { borderColor: COLORS.gray }]}
-                    >
-                      <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
-                    </TouchableOpacity>
+          ) : (
+            <View style={styles.activeWorkoutContainer}>
+              <View style={styles.workoutHeader}>
+                <TouchableOpacity 
+                  onPress={() => setIsEditingTitle(true)}
+                  style={styles.titleContainer}
+                >
+                  {isEditingTitle ? (
+                    <TextInput
+                      style={styles.titleInput}
+                      value={workoutTitle}
+                      onChangeText={setWorkoutTitle}
+                      onBlur={() => setIsEditingTitle(false)}
+                      autoFocus
+                    />
+                  ) : (
+                    <Text style={styles.activeWorkoutTitle}>{workoutTitle}</Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.photoButton}>
+                  <Text style={styles.photoButtonText}>📸</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.timerContainer}>
+                  <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
+                  <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
+                    {!paused ? (
+                      <>
+                        <Text style={workoutStyles.statusText}>🔴</Text>
+                        <Text style={workoutStyles.statusText}>in progress</Text>
+                      </>
+                    ) : (
+                      <>
+                        <Text style={workoutStyles.statusText}>⏸️</Text>
+                        <Text style={workoutStyles.statusText}>paused</Text>
+                      </>
+                    )}
+                    
                   </View>
-                  {informationExercise && (
-                    <View>
-                      <View style={styles.gif}>
-                        {/* {gifLoading ? (
-                          <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
-                        ) : null} */}
-                        <Image 
-                          source={{ uri: informationExercise.gifUrl }}
-                          style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
-                          onLoadStart={() => setGifLoading(true)}
-                          onLoad={() => setGifLoading(false)}
-                          onError={() => setGifLoading(false)}
-                        />
-                      </View>
-                      <View style={workoutStyles.tabContent}>
-                        <View style={styles.titleContainer}>
-                          <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
-                        </View>
-                        <ExerciseInstructions instructions={informationExercise.instructions} />
-                        <DetailRow
-                          label="Body Parts"
-                          value={arrayToString(informationExercise.bodyParts)}
-                        />
-                        <DetailRow
-                          label="Target Muscles"
-                          value={arrayToString(informationExercise.targetMuscles)}
-                        />
-                        <DetailRow
-                          label="Secondary Muscles"
-                          value={arrayToString(informationExercise.secondaryMuscles)}
-                        />
-                      </View>
-                    </View>
+              </View>
+
+              <ScrollView style={styles.exercisesList}>
+                {exercises.map((item) => (
+                  <View key={item._id}>
+                    {renderExercise({ item })}
+                  </View>
+                ))}
+                  
+
+                <TouchableOpacity 
+                  style={styles.addExerciseButton}
+                  onPress={() => setShowAddExercise(true)}
+                >
+                  <Text style={styles.addExerciseText}>+ Add Exercise</Text>
+                </TouchableOpacity>
+              </ScrollView>
+
+              <View style={styles.workoutControls}>
+                  {!paused ? (
+                    <TouchableOpacity
+                      style={styles.pauseButton}
+                      onPress={pauseWorkout}
+                    >
+                      <Text style={styles.controlButtonText}>⏸️ Pause</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.resumeButton}
+                      onPress={resumeWorkout}
+                    >
+                    <Text style={styles.controlButtonText}>▶️ Resume</Text>
+                  </TouchableOpacity>
                   )}
                   
-                </View>
+                  <TouchableOpacity
+                    style={styles.endButton}
+                    onPress={endWorkout}
+                  >
+                    <Text style={styles.controlButtonText}>🏁 End Workout</Text>
+                  </TouchableOpacity>
               </View>
-            </Modal>
-          </SafeScreen>
-        </SafeAreaProvider>
-      </Modal>
+            </View>
+          )}
 
-      {/* Info of exercise Modal */} 
-      
+          {/* Add Exercise Modal */}
+          {/* <Modal
+            visible={showAddExercise}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setShowAddExercise(false)}
+          >
+            <SafeAreaProvider>
+              <SafeScreen>
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Add Exercise</Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowAddExercise(false)
+                          setSearchQuery('')
+                          setSearchResults([])
+                        }}
+                        style={[styles.headerButton, { borderColor: COLORS.red } ]}
+                      >
+                        <Ionicons name="close" size={20} color={COLORS.red} />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.modalInputBox}>
+                      <TextInput  
+                        style={styles.modalInput}
+                        placeholder="Search exercises (e.g. push up)"
+                        value={searchQuery}
+                        onChangeText={handleSearchInput}
+                        autoFocus
+                      />
+                      {searchQuery.length > 0 && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSearchQuery('')
+                            setSearchResults([])
+                          }}
+                          style={styles.clearButton}
+                        >
+                          <Ionicons name="close" size={16} color={COLORS.textDark} />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    {searchQuery.length > 0 ? (
+                      <FlatList 
+                        data={searchResults}
+                        renderItem={renderExerciseInSearch}
+                        keyExtractor={(item: exerciseFromSearchObj) => item.exerciseId}
+                        contentContainerStyle={homeStyles.listContainer}
+                        showsVerticalScrollIndicator={true}
+                        onEndReached={handleLoadMoreExercisesInSearch}
+                        onEndReachedThreshold={0.1}
+                        ListEmptyComponent={() => {
+                          if (searchLoading) {
+                            return (
+                              <View style={homeStyles.emptyContainer}>
+                                <ActivityIndicator style={homeStyles.footerLoader} size="large" color={COLORS.primary} />
+                                <Text style={homeStyles.emptyText}>Searching exercises...</Text>
+                              </View>
+                            )
+                          } 
+                          return (
+                            <View style={homeStyles.emptyContainer}>
+                              <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
+                              <TouchableOpacity
+                                onPress={addNewExercise}
+                                style={styles.addButton}
+                              >
+                                <Text style={styles.addButtonText}>Add new exercise</Text>
+                              </TouchableOpacity>
+                            </View>
+                          )
+                        }}
+                        ListFooterComponent={
+                          searchHasMore && searchResults.length > 0 ? (
+                            <ActivityIndicator style={homeStyles.footerLoader} size="small" color={COLORS.primary} />
+                          ) : null
+                        }
+                        refreshControl={
+                          <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => searchExercises(1, searchQuery)}
+                            colors={[COLORS.primary]}
+                            tintColor={COLORS.primary}
+                          />
+                        }
+                      />
+                    ) : (
+                      null
+                    )}
+                    {selectedExerciseId.length > 0 && 
+                      <View style={{justifyContent: 'flex-end', flex: 1, flexDirection: 'row', padding: 20, paddingRight: 3 }}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setShowAddExercise(false)
+                            addExercise()
+                          }}
+                          style={[styles.footerButton, { borderColor: COLORS.blue }]}
+                        >
+                          <Ionicons name="add" color={COLORS.blue} size={20} />
+                        </TouchableOpacity>
+                      </View>
+                    }
+                    
+                  </View>
+                </View>
+                <Modal
+                  visible={informationId !== ""}
+                  animationType="slide" 
+                  transparent={true} 
+                >
+                  <View style={styles.informationModalOverlay}>
+                    <View style={styles.informationModalContent}>
+                      <View style={styles.modalHeader}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setInformationId("")
+                            setInformationExercise(null)
+                          }}
+                          style={[styles.headerButton, { borderColor: COLORS.gray }]}
+                        >
+                          <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
+                        </TouchableOpacity>
+                      </View>
+                      {informationExercise && (
+                        <View>
+                          <View style={styles.gif}> */}
+                            {/* {gifLoading ? (
+                              <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
+                            ) : null} */}
+                            {/* <Image 
+                              source={{ uri: informationExercise.gifUrl }}
+                              style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
+                              onLoadStart={() => setGifLoading(true)}
+                              onLoad={() => setGifLoading(false)}
+                              onError={() => setGifLoading(false)}
+                            />
+                          </View>
+                          <View style={workoutStyles.tabContent}>
+                            <View style={styles.titleContainer}>
+                              <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
+                            </View>
+                            <ExerciseInstructions instructions={informationExercise.instructions} />
+                            <DetailRow
+                              label="Body Parts"
+                              value={arrayToString(informationExercise.bodyParts)}
+                            />
+                            <DetailRow
+                              label="Target Muscles"
+                              value={arrayToString(informationExercise.targetMuscles)}
+                            />
+                            <DetailRow
+                              label="Secondary Muscles"
+                              value={arrayToString(informationExercise.secondaryMuscles)}
+                            />
+                          </View>
+                        </View>
+                      )}
+                      
+                    </View>
+                  </View>
+                </Modal>
+              </SafeScreen>
+            </SafeAreaProvider>
+          </Modal> */}
 
-      <FlatList
-        data={workouts} 
-        renderItem={renderWorkout}
-        keyExtractor={(item: workoutObj) => item._id}
-        contentContainerStyle={homeStyles.listContainer}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleLoadMore}
-        extraData={renderTrigger}
-        onEndReachedThreshold={0.1}
-        ListHeaderComponent={
-          <View style={homeStyles.header}>
-            <Text style={homeStyles.headerSubtitle}>Look how far you've come! 👇</Text>
-          </View>
-        }
-        ListEmptyComponent={
-          <View style={homeStyles.emptyContainer}>
-            <Ionicons name="barbell-outline" size={60} color={COLORS.textSecondary} />
-            <Text style={homeStyles.emptyText}>No workouts yet 😞</Text>
-            <Text style={homeStyles.emptySubtext}>Get to work 🔒</Text>
-          </View>
-        }
-        ListFooterComponent={
-          hasMore && workouts.length > 0 ? (
-            <ActivityIndicator style={homeStyles.footerLoader} size="small" color={COLORS.primary} />
-          ) : null
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => getWorkouts(1, true)}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
+          {/* Info of exercise Modal */} 
+          
+
+          {/* <FlatList
+            data={workouts} 
+            renderItem={renderWorkout}
+            keyExtractor={(item: workoutObj) => item._id}
+            contentContainerStyle={homeStyles.listContainer}
+            showsVerticalScrollIndicator={false}
+            onEndReached={handleLoadMore}
+            extraData={renderTrigger}
+            onEndReachedThreshold={0.1}
+            ListHeaderComponent={
+              <View style={homeStyles.header}>
+                <Text style={homeStyles.headerSubtitle}>Look how far you've come! 👇</Text>
+              </View>
+            }
+            ListEmptyComponent={
+              <View style={homeStyles.emptyContainer}>
+                <Ionicons name="barbell-outline" size={60} color={COLORS.textSecondary} />
+                <Text style={homeStyles.emptyText}>No workouts yet 😞</Text>
+                <Text style={homeStyles.emptySubtext}>Get to work 🔒</Text>
+              </View>
+            }
+            ListFooterComponent={
+              hasMore && workouts.length > 0 ? (
+                <ActivityIndicator style={homeStyles.footerLoader} size="small" color={COLORS.primary} />
+              ) : null
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => getWorkouts(1, true)}
+                colors={[COLORS.primary]}
+                tintColor={COLORS.primary}
+              />
+            }
           />
-        }
-      />
+        </View>
+      </View> */}
     </View>
   )
 }

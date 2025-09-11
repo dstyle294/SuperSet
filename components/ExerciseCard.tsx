@@ -1,9 +1,9 @@
-import { exerciseObj } from "@/app/types/workout.types";
+import { exerciseObj, workoutSet } from "@/app/types/workout.types";
 import styles from "@/assets/styles/workout.styles";
 import COLORS from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 
 interface ExerciseCardProps {
@@ -41,28 +41,26 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ( { exercise, index } )
           )}
         </TouchableOpacity>
         {expanded ? (
-          <FlatList
-            data={exercise.sets}
-            keyExtractor={(set) => set._id}
-            renderItem={({ item, index }) => (
-              <View
-                key={item._id}
-                style={[
-                  styles.setItem,
-                  item.completed ? styles.completedSet : styles.pendingSet,
-                ]}
-              >
+          <View>
+            {exercise.sets.map((set : workoutSet) => (
+                <View
+                  key={set._id}
+                  style={[
+                    styles.setItem,
+                    set.completed ? styles.completedSet : styles.pendingSet,
+                  ]}
+                >
                   <Text style={styles.setNumber}>Set {index + 1}</Text>
                   <Text style={styles.setDetails}>
-                    {item.weight} kg × {item.reps}
+                    {set.weight} kg × {set.reps}
                   </Text>
                   <Text style={styles.volumeText}>
-                    Volume: {item.weight * item.reps} kg
+                    Volume: {set.weight * set.reps} kg
                   </Text>
-              </View>
-            )}
-          />
-            ) : (
+                </View>
+            ))}
+          </View>
+        ) : (
           <>
           </>
         )}

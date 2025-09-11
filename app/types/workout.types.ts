@@ -5,6 +5,7 @@ export interface workoutSet {
   rest_time: number,
   duration: number,
   completed: boolean,
+  set_number: number,
 }
 
 export interface exerciseObj {

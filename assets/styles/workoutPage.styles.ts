@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
     backgroundColor: COLORS.background,
   },
   startButton: {
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
   },
   activeWorkoutContainer: {
     paddingLeft: 10,
+    flex: 1,
   },
   workoutHeader: {
     flexDirection: 'row',
@@ -80,6 +81,7 @@ const styles = StyleSheet.create({
   },
   exercisesList: {
     marginBottom: 20,
+    flexShrink: 1,
   },
   exerciseItem: {
     flexDirection: 'row',
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: COLORS.textDark,
-    marginBottom: 5,
+    margin: 5,
     flex: 1, 
   },
   exerciseDetails: {
@@ -312,6 +314,30 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     color: COLORS.textSecondary,
+  },
+  liveExercisesContainer: {
+    flexDirection: 'column',
+    padding: 10,
+    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    margin: 8,
+  },
+  setContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  setNumber: {
+    color: COLORS.textSecondary,
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginHorizontal: 30,
+    marginBottom: 10,
+  },
+  setInputBox: {
+    height: 30,
+    width: 100,
+    borderRadius: 8,
+    borderWidth: 1, 
   }
 })
 
