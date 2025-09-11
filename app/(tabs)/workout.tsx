@@ -75,7 +75,7 @@ export default function Workout() {
     getWorkouts()
 
     return () => clearInterval(interval)
-  }, [isWorkoutActive, paused, shouldResume, workoutId])
+  }, [isWorkoutActive, paused, shouldResume, workoutId, exercises])
 
   const updateWorkoutInList = (workoutId: string, updates: Partial<workoutObj>) => {
     setWorkouts(prevWorkouts => 
@@ -284,7 +284,7 @@ export default function Workout() {
       if (!response.ok) throw new Error(addData.message || "Something went wrong")
 
       console.log(addData)
-      setExercises([...exercises, addData.exercise])
+      setExercises(addData.workout.exercises)
       setShowAddExercise(false)
 
     } catch (error) {
@@ -557,10 +557,13 @@ export default function Workout() {
           </View>
 
           <View style={styles.exercisesList}>
+              <FlatList 
+                data={exercises}
+                
               {exercises.map(exercise => (
                 <View key={exercise._id} style={styles.exerciseItem}>
                   <Text style={styles.exerciseName}>{exercise.name}</Text>
-                  <Text style={styles.exerciseDetails}>0 sets</Text>
+                  <Text style={styles.exerciseDetails}>{exercise.sets.length} sets</Text>
                 </View>
               ))}
 
