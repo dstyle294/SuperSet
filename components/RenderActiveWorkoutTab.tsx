@@ -6,21 +6,28 @@ import { formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/store/authStore"
 import { useState } from "react"
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { RenderAddExercise } from "./RenderAddExercise"
 
+interface RenderActiveWorkoutTabProps {
+  workoutId: string,
+  setWorkoutId: (id: string) => void,
+  isWorkoutActive: boolean,
+  setIsWorkoutActive: (active: boolean) => void,
+}
 
-export const RenderActiveWorkoutTab = () => {
+export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive }) => {
   const { token } = useAuthStore()
 
-  const [ isWorkoutActive, setIsWorkoutActive ] = useState(false)
   const [ workoutTitle, setWorkoutTitle ] = useState("")
   const [ workoutTime, setWorkoutTime ] = useState(0)
   const [ exercises, setExercises ] = useState<exerciseObj[]>([])
-  const [ workoutId, setWorkoutId ] = useState("")
   const [ isEditingTitle, setIsEditingTitle ] = useState(false)
   const [ paused, setPaused ] = useState(false)
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ workouts, setWorkouts ] = useState<workoutObj[]>([])
   const [ renderTrigger, setRenderTrigger ] = useState(0)
+  const [ refreshing, setRefreshing ] = useState(false)
+  
   
 
   const capitalizeFirstLetter = (exerciseName: string) => {
@@ -276,6 +283,16 @@ export const RenderActiveWorkoutTab = () => {
             >
               <Text style={styles.controlButtonText}>🏁 End Workout</Text>
             </TouchableOpacity>
+            <RenderAddExercise
+               showAddExercise={showAddExercise}
+               setShowAddExercise={setShowAddExercise}
+               refreshing={refreshing} 
+               setRefreshing={setRefreshing} 
+               exercises={exercises}
+               setExercises={setExercises}
+               workoutId={workoutId}
+               setWorkoutId={setWorkoutId}
+            />
         </View>
       </View>
     )
