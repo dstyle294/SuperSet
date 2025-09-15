@@ -103,7 +103,6 @@ const styles = StyleSheet.create({
   },
   addExerciseButton: {
     paddingVertical: 12,
-    marginRight: 10,
     alignItems: 'center',
     backgroundColor: COLORS.white,
     borderRadius: 8,
@@ -118,7 +117,6 @@ const styles = StyleSheet.create({
   },
   workoutControls: {
     flexDirection: 'row',
-    // justifyContent: 'space-between',
     gap: 12,
   },
   pauseButton: {
@@ -131,7 +129,6 @@ const styles = StyleSheet.create({
   resumeButton: {
     flex: 1,
     backgroundColor: COLORS.blue,
-    marginLeft: 10,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -147,7 +144,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginRight: 10,
   },
   modalOverlay: {
     flex: 1,
@@ -322,7 +318,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    paddingLeft: 25,
+    paddingHorizontal: 25,
+    justifyContent: 'space-between'
   },
   setNumber: {
     color: COLORS.textSecondary,

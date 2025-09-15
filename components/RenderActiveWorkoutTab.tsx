@@ -217,6 +217,27 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
+  const addSet = async (exercise: exerciseObj) => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`, 
+          'Content-Type': 'application/json'
+        }, 
+        body: JSON.stringify({ set_number: exercise.sets.length + 1, reps: null, weight: null, completed: false, notes: "" })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+    } catch (error) {
+      console.log(`Error adding set ${error}`)
+    }
+  }
+
   const onRepChange = async (reps: number, item: workoutSet, exercise: exerciseObj) => {
     try {
       item.reps = reps
