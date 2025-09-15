@@ -68,7 +68,6 @@ export default function Post() {
         body: formData,
       }
     )
-    console.log(response)
 
     const data = await response.json()
     return data.secure_url
@@ -118,7 +117,6 @@ export default function Post() {
         body: JSON.stringify(payload)
       })
 
-      console.log(response);
       const data = await response.json()
 
       if (!response.ok) throw new Error(data.message || "Something went wrong")

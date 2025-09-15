@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import styles from '@/assets/styles/home.styles'
@@ -7,6 +7,7 @@ import { RenderUser } from '@/components/RenderUser'
 import { formatPublishDate } from '../../lib/utils'
 import COLORS from '@/constants/colors'
 import { Ionicons } from '@expo/vector-icons'
+import Loader from '../../components/loader'
 
 interface mediaObj {
   type: string,
@@ -37,6 +38,7 @@ interface postOfArray {
   }
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export default function Home() {
   
@@ -53,7 +55,7 @@ export default function Home() {
       if ( refreshing ) setRefreshing(true);
       else if ( pageNum === 1 ) setLoading(true);
 
-      const response = await fetch(`${API_URL}/posts?page=${pageNum}&limit=2`, {
+      const response = await fetch(`${API_URL}/posts?page=${pageNum}&limit=5`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`
@@ -61,6 +63,8 @@ export default function Home() {
       })
 
       const data = await response.json()
+
+      console.log(data.posts.length)
 
       if (!response.ok) throw new Error(data.message || "Failed to fetch posts");
 
@@ -96,6 +100,8 @@ export default function Home() {
       await fetchPosts(page + 1)
     }
   }
+
+  if (loading) return <Loader size="small" />
 
   const renderItem = ({ item }: {item: postObj}) => ( // flatlist expects function that receives object with item in that object
     <View style={styles.postCard}>
@@ -139,6 +145,11 @@ export default function Home() {
             <Text style={styles.emptyText}>No posts yet 😞</Text>
             <Text style={styles.emptySubtext}>Be the first to share a post!</Text>
           </View>
+        }
+        ListFooterComponent={
+          hasMore && posts.length > 0 ? (
+            <ActivityIndicator style={styles.footerLoader} size="small" color={COLORS.primary} />
+          ) : null
         }
       />
     </View>
