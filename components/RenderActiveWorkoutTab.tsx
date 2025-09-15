@@ -4,8 +4,8 @@ import styles from "@/assets/styles/workoutPage.styles"
 import { API_URL } from "@/constants/api"
 import { formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/store/authStore"
-import { useEffect, useState } from "react"
-import { Alert, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { Alert, FlatList, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { RenderAddExercise } from "./RenderAddExercise"
 import Loader from "./loader"
 import COLORS from "@/constants/colors"
@@ -34,6 +34,9 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ workouts, setWorkouts ] = useState<workoutObj[]>([])
   const [ renderTrigger, setRenderTrigger ] = useState(0)
+  const lastTap = useRef(null)
+
+  const DOUBLE_TAP_DELAY = 300 // ms
   
   useEffect(() => {
     getWorkoutById(workoutId)
@@ -71,8 +74,9 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     )
   }
 
-  const getWorkoutById = async (workoutId: string) => {
+  const getWorkoutById = async (workoutId: string, refreshing = false) => {
     try {
+      if (refreshing) setRefreshing(true)
       if (!workoutId) {
         return 
       }
@@ -95,7 +99,58 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
 
     } catch (error) {
       console.log(`Error fetching workout ${error}`)
+    } finally {
+      if (refreshing) setRefreshing(false)
     }
+  }
+
+  const deleteExercise = async (exerciseId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exerciseId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+
+    } catch (error) {
+      console.log(`Error deleting exercise ${error}`)
+      Alert.alert("Error", "Couldn't delete exercise")
+    }
+  }
+
+  const confirmDelete = (exerciseId: string) => {
+    console.log(exerciseId)
+    Alert.alert(
+      "Delete?", 
+      "Are you sure you want to delete this exercise?",
+      [ 
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setRefreshing(true)
+            try {
+              await deleteExercise(exerciseId)
+              await getWorkoutById(workoutId, true)
+            } finally {
+              setRefreshing(false)
+            }
+          } 
+        }
+      ], 
+      { cancelable: false }
+    )
   }
 
   const pauseWorkout = async () => {
@@ -217,8 +272,11 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
+  
+ 
   const addSet = async (exercise: exerciseObj) => {
     try {
+      setRefreshing(true)
       const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets`, {
         method: 'POST',
         headers: {
@@ -244,6 +302,8 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
       
     } catch (error) {
       console.log(`Error adding set ${error}`)
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -316,9 +376,13 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
+  const handleSetTap = () => {
+
+  }
+
   const renderSet = (set: workoutSet, exercise: exerciseObj) => {
     return (
-      <View style={styles.setContainer}>
+      <TouchableOpacity style={styles.setContainer} onPress={handleSetTap}>
         <Text style={styles.setNumber}>Set {set.set_number}</Text>
         <TextInput
           style={styles.setInputBox}
@@ -348,14 +412,19 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
           />
         </TouchableOpacity>
 
-      </View>
+      </TouchableOpacity>
     )
   }
 
   const renderExercise = ({ item } : { item: exerciseObj}) => {
     const completedSets = item.sets.filter(set => set.completed === true).length
     return (
-      <View style={styles.liveExercisesContainer}>
+      <TouchableOpacity 
+        style={styles.liveExercisesContainer}
+        onLongPress={() => confirmDelete(item._id)}
+        delayLongPress={500} 
+        activeOpacity={0.7}
+      >
         <View key={item._id} style={styles.exerciseItem}>
           <Text style={styles.exerciseName}>{capitalizeFirstLetter(item.name)}</Text>
           <Text style={styles.exerciseDetails}>{completedSets} of {item.sets.length} sets completed</Text>
@@ -371,7 +440,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
         >
           <Text style={styles.addSetButtonText}>+ Add Set</Text>
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     )
   }
 
@@ -436,6 +505,14 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
               keyExtractor={(item) => item._id}
               renderItem={renderExercise}
               showsVerticalScrollIndicator={true}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => getWorkoutById(workoutId)}
+                  colors={[COLORS.primary]}
+                  tintColor={COLORS.primary}
+                />
+              }
             />
               
 
@@ -470,6 +547,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
               >
                 <Text style={styles.controlButtonText}>🏁 End Workout</Text>
               </TouchableOpacity>
+
               <RenderAddExercise
                 showAddExercise={showAddExercise}
                 setShowAddExercise={setShowAddExercise}
@@ -480,6 +558,12 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
                 workoutId={workoutId}
                 setWorkoutId={setWorkoutId}
               />
+          </View>
+
+          <View style={styles.hints}>
+              <Text style={styles.hintText}>
+                💡 Tip: Long press any exercise to delete it
+              </Text>
           </View>
         </View>
       )}

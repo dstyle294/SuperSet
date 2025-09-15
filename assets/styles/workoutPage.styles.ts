@@ -1,5 +1,6 @@
 import COLORS from "@/constants/colors";
 import { StyleSheet } from "react-native";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 const styles = StyleSheet.create({
   container: {
@@ -371,6 +372,16 @@ const styles = StyleSheet.create({
     width: 30,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  hints: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    padding: 10,
+  },
+  hintText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: COLORS.textSecondary,
   }
 })
 

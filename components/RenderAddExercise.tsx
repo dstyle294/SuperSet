@@ -170,6 +170,7 @@ export const RenderAddExercise: React.FC<RenderAddExerciseProps> = ({ showAddExe
 
   const addExercise = async () => {
     try {
+      setRefreshing(true)
       const response = await fetch(`${API_URL}/exercises/id/${selectedExerciseId}`, {
         method: 'GET',
       })
@@ -208,6 +209,8 @@ export const RenderAddExercise: React.FC<RenderAddExerciseProps> = ({ showAddExe
 
     } catch (error) {
       console.log(`Error adding exercise ${error}`)
+    } finally {
+      setRefreshing(false)
     }
   }
 
