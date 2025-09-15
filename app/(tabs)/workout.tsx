@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
 import { useAuthStore } from '@/store/authStore'
@@ -318,6 +318,22 @@ export default function Workout() {
     }
   }
 
+  const timeoutRef = useRef<number | null>(null)
+
+  const searchWithDebounce = useCallback((query: string) => {
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+
+    // Set new timeout
+    timeoutRef.current = setTimeout(() => {
+      console.log(`Searching for ${query}`)
+
+      searchExercises(query)
+    }, 500)
+  }, [])
+
   const searchExercises = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([])
@@ -327,10 +343,28 @@ export default function Workout() {
     setIsSearching(true)
 
     try {
-      
+      const response = await fetch(`${API_URL}/exercises/name/${query}`, {
+          method: 'GET',
+        }
+      )
+
+      console.log(response)
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong!")
+
+      setSearchResults(data.exercises.data)
+        
     } catch (error) {
-      
+      console.error(`Error fetching exercises: ${error}`)
+    } finally {
+      setIsSearching(false)
     }
+  }
+
+  const handleSearchInput = (text: string) => {
+    setSearchQuery(text)
+    searchWithDebounce(text)
   }
   
   if (loading) return <Loader size="small" />
@@ -440,26 +474,28 @@ export default function Workout() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add Exercise</Text>
-            <TextInput  
-              style={styles.modalInput}
-              placeholder="Exercise name"
-              value={newExerciseName}
-              onChangeText={setNewExerciseName}
-              autoFocus
-            />
+            <View style={styles.modalInputBox}>
+              <TextInput  
+                style={styles.modalInput}
+                placeholder="Search exercises (e.g. push up)"
+                value={searchQuery}
+                onChangeText={handleSearchInput}
+                autoFocus
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSearchQuery('')
+                    setSearchResults([])
+                  }}
+                  style={styles.clearButton}
+                >
+                  <Ionicons name="close" size={16} color={COLORS.textDark} />
+                </TouchableOpacity>
+              )}
+            </View>
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setShowAddExercise(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={addExercise}
-              >
-                <Text style={styles.addButtonText}>Add</Text>
-              </TouchableOpacity>
+              
             </View>
           </View>
         </View>
