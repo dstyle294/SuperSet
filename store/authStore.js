@@ -11,6 +11,7 @@ export const useAuthStore = create((set) => ({
 
     set({ isLoading: true })
     try {
+
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -31,13 +32,14 @@ export const useAuthStore = create((set) => ({
       await AsyncStorage.setItem("user", JSON.stringify(data.user))
       await AsyncStorage.setItem("token", data.token)
 
-      set({token: data.token, user: data.user, isLoading: false})
+      set({token: data.token, user: data.user})
 
       return { success: true }
 
     } catch (error) {
-      set({ isLoading: false })
       return { success: false, error: error.message }
+    } finally {
+      set({ isLoading: false })
     }
   },
 
@@ -66,20 +68,26 @@ export const useAuthStore = create((set) => ({
 
       return { success: true }
     } catch (error) {
-      set({ isLoading: false })
       return { success: false, error: error.message }
+    } finally {
+      set({ isLoading: false })
     }
   },
 
   checkAuth: async () => {
+    set({ isLoading: true })
     try {
-      const token = await AsyncStorage.getItem("token")
-      const userJson = await AsyncStorage.getItem("user")
+
+      const token = await AsyncStorage.getItem("token") || null
+      const userJson = await AsyncStorage.getItem("user") 
       const user = userJson ? JSON.parse(userJson) : null
 
-      set({ token, user })
+      console.log(token)
+
+      set({ token, user, isLoading: false })
     } catch (error) {
       console.log("Auth check failed", error)
+      set({ token: null, user: null, isLoading: false })
     }
   },
 

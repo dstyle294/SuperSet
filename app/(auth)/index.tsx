@@ -1,5 +1,5 @@
 import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { useState } from 'react'
 import styles from '../../assets/styles/login.styles'
 import { Ionicons } from '@expo/vector-icons'
@@ -15,7 +15,8 @@ export default function Login() {
   const handleLogin = async () => {
     const result = await login(email, password)
 
-    if (!result.success) Alert.alert("Error", result.error)
+    if (!result.success) Alert.alert("Error", result.error) 
+    else router.replace('/(tabs)')
   }
   
   return (

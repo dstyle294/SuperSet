@@ -2,15 +2,20 @@ import { Stack } from "expo-router";
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import SafeScreen from '../components/SafeScreen'
 import { StatusBar } from 'expo-status-bar'
-import { useAuthStore } from "../store/authStore";
-import { useEffect } from "react";
-import NavigationHandler from '../components/NavigationHandler';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+
+// Prevent the splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { checkAuth } = useAuthStore();
-
   useEffect(() => {
-    checkAuth();
+    // Hide splash screen after a short delay to ensure layout is mounted
+    const timer = setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -20,7 +25,6 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(auth)" />
         </Stack>
-        <NavigationHandler />
       </SafeScreen>
       <StatusBar style="dark" />
     </SafeAreaProvider>

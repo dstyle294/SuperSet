@@ -1,5 +1,5 @@
 import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from '../../assets/styles/signup.styles'
 import { Ionicons } from '@expo/vector-icons'
 import COLORS from '../../constants/colors'
@@ -12,15 +12,23 @@ export default function signup() {
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const {user, isLoading, register} = useAuthStore()
+  const {user, token, isLoading, register} = useAuthStore()
 
 
+
+
+  useEffect(() => {
+    if (user && token && !isLoading) {
+      // Navigate when user is successfully registered
+      router.replace("/(tabs)")
+    }
+  }, [user, token, isLoading])
 
   const handleSignup = async () => {
-    console.log(name)
     const result = await register(name, username, email, password)
 
     if (!result.success) Alert.alert("Error", result.error)
+    else {router.replace("/(tabs)")}
   }
 
 
@@ -134,7 +142,7 @@ export default function signup() {
             </View>
 
             {/* SIGNUP BUTTON */}
-            <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={isLoading}>
+            <TouchableOpacity style={styles.button} onPress={() => handleSignup()} disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (

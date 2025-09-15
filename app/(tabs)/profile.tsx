@@ -7,6 +7,7 @@ import { API_URL } from '@/constants/api'
 import Loader from '@/components/loader'
 import { DetailRow } from '@/components/DetailRow'
 import { formatMemberSince } from '@/lib/utils'
+import { router } from 'expo-router'
 
 export default function Profile() {
   const { logout, token } = useAuthStore()
@@ -66,7 +67,12 @@ export default function Profile() {
         label="Member since"
         value={formatMemberSince(profile?.createdAt)}
       />
-      <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+      <TouchableOpacity 
+        onPress={() => {
+          logout()
+          router.replace('/(auth)')
+        }} 
+        style={styles.logoutButton}>
         <Text>Logout</Text>
       </TouchableOpacity>
     </View>
