@@ -8,13 +8,27 @@ export interface workoutSet {
 }
 
 export interface exerciseObj {
-  api_exercise_id: String,
-  name: String,
+  api_exercise_id: string,
+  name: string,
   order: Number,
   sets: workoutSet[],
-  notes: String,
+  notes: string,
   added_at: Date,
   _id: string,
+}
+
+export interface exerciseFromSearchObj {
+  bodyPart: string,
+  "upper arms": string,
+  category: string,
+  description: string,
+  difficulty: string,
+  equipment: string,
+  id: string,
+  instructions: string[],
+  name: string,
+  secondaryMuscles: string[],
+  target: string,
 }
 
 export interface workoutObj {

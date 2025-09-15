@@ -3,17 +3,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
 import { useAuthStore } from '@/store/authStore'
-import { exerciseObj, workoutObj } from '../types/workout.types'
+import { exerciseFromSearchObj, exerciseObj, workoutObj } from '../types/workout.types'
 import { RenderWorkout } from '@/components/RenderWorkout'
 import { Ionicons } from '@expo/vector-icons'
 import Loader from '@/components/loader'
 import homeStyles from '@/assets/styles/home.styles'
 import COLORS from '@/constants/colors'
 import workoutStyles from '@/assets/styles/workout.styles'
+import { addNewExercise } from '../services/exerciseServices'
+import { formatTime } from '@/lib/utils'
+import { RenderExerciseInSearch } from '@/components/RenderExerciseInSearch'
 
 export default function Workout() {
   const { token } = useAuthStore()
-  const [workouts, setWorkouts] = useState<workoutObj[]>([])
+  const [ workouts, setWorkouts ] = useState<workoutObj[]>([])
   const [ loading, setLoading ] = useState(true)
   const [ refreshing, setRefreshing ] = useState(false)
   const [ page, setPage ] = useState(1)
@@ -26,7 +29,7 @@ export default function Workout() {
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ newExerciseName, setNewExerciseName ] = useState("")
   const [ searchQuery, setSearchQuery ] = useState("")
-  const [ searchResults, setSearchResults ] = useState([])
+  const [ searchResults, setSearchResults ] = useState<exerciseFromSearchObj[]>([])
   const [ isSearching, setIsSearching ] = useState(false)
   const [ workoutId, setWorkoutId ] = useState("")
   const [ paused, setPaused ] = useState(false)
@@ -47,7 +50,7 @@ export default function Workout() {
       setShouldResume(false)
     }
 
-
+    getWorkouts()
 
     return () => clearInterval(interval)
   }, [isWorkoutActive, paused, shouldResume, workoutId])
@@ -63,7 +66,7 @@ export default function Workout() {
   }
 
 
-  const renderWorkout = ({ item } : {item: workoutObj}) => {
+  const renderWorkout = ({ item } : { item: workoutObj }) => {
     const getCurrentStatus = () => {
       if (item._id === workoutId && isWorkoutActive) {
         return paused ? 'paused' : 'in-progress'
@@ -120,17 +123,6 @@ export default function Workout() {
     )
   }
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = Math.floor(seconds % 60)
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${secs}s`
-    }
-    return `${minutes}m ${secs}s`
-  }
-
   const getWorkouts = async (pageNum = 1, refreshing = false) => {
     try {
       if ( refreshing ) setRefreshing(true)
@@ -170,14 +162,24 @@ export default function Workout() {
     }
   }
 
-  useEffect(() => {
-    getWorkouts()
-  }, [])
-
   const handleLoadMore = async () => {
     if (hasMore && !loading && !refreshing) {
       await getWorkouts(page + 1)
     }
+  }
+
+  const renderExerciseInSearch = ({ item } : { item: exerciseFromSearchObj }) => {
+    return (
+      <RenderExerciseInSearch exercise={item} />
+    )
+  }
+
+  const handleLoadMoreExercisesInSearch = async () => {
+
+  }
+
+  const addNewExercise = async () => {
+
   }
 
   const pauseWorkout = async () => {
@@ -348,12 +350,12 @@ export default function Workout() {
         }
       )
 
-      console.log(response)
       const data = await response.json()
 
       if (!response.ok) throw new Error(data.message || "Something went wrong!")
 
       setSearchResults(data.exercises.data)
+
         
     } catch (error) {
       console.error(`Error fetching exercises: ${error}`)
@@ -368,9 +370,10 @@ export default function Workout() {
   }
   
   if (loading) return <Loader size="small" />
-
+  
 
   return (
+    
     <View style={styles.container}>
       {!isWorkoutActive ? (
         <View style={styles.startWorkoutContainer}>
@@ -473,7 +476,19 @@ export default function Workout() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Exercise</Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Exercise</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowAddExercise(false)
+                  setSearchQuery('')
+                  setSearchResults([])
+                }}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={20} color={COLORS.red} />
+              </TouchableOpacity>
+            </View>
             <View style={styles.modalInputBox}>
               <TextInput  
                 style={styles.modalInput}
@@ -494,13 +509,34 @@ export default function Workout() {
                 </TouchableOpacity>
               )}
             </View>
-            <View style={styles.modalButtons}>
-              
-            </View>
+            {searchQuery.length > 0 ? (
+              <FlatList 
+                data={searchResults}
+                renderItem={renderExerciseInSearch}
+                keyExtractor={(item: exerciseFromSearchObj) => item.id}
+                contentContainerStyle={homeStyles.listContainer}
+                showsVerticalScrollIndicator={true}
+                onEndReached={handleLoadMoreExercisesInSearch}
+                onEndReachedThreshold={0.1}
+                ListEmptyComponent={
+                  <View style={homeStyles.emptyContainer}>
+                    <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
+                    <TouchableOpacity
+                      onPress={addNewExercise}
+                      style={styles.addButton}
+                    >
+                      <Text style={styles.addButtonText}>Add new exercise</Text>
+                    </TouchableOpacity>
+                  </View>
+                }
+              />
+            ) : (
+              null
+            )}
+            
           </View>
         </View>
       </Modal>
-
       <FlatList
         data={workouts} 
         renderItem={renderWorkout}

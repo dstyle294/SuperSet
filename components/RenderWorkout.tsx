@@ -64,9 +64,9 @@ const formatDuration = (startTime: (string | undefined), total_duration: (number
 
 export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId, currentStatus }) => {
   const { token } = useAuthStore()
-  const [workout, setWorkout] = useState<workoutObj|null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [activeTab, setActiveTab] = useState('overview')
+  const [ workout, setWorkout ] = useState<workoutObj|null>(null)
+  const [ loading, setLoading ] = useState<boolean>(true)
+  const [ activeTab, setActiveTab ] = useState('overview')
 
   const status = currentStatus || workout?.status
 
