@@ -7,6 +7,7 @@ import { StatCard } from "./StatCard"
 import { Badge } from "./Badge"
 import { exerciseObj, workoutObj } from "@/app/types/workout.types"
 import { ExerciseCard } from "./ExerciseCard"
+import { DetailRow } from "./DetailRow"
 
 
 
@@ -103,6 +104,37 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
             {workout?.exercises.map((exercise, index) => (
               <ExerciseCard key={index} exercise={exercise} index={index} />
             ))}
+          </View>
+        )
+      case 'details':
+        return (
+          <View style={styles.tabContent}>
+            <DetailRow
+              label="Started"
+              value={new Date(workout?.start_time || Date.now()).toLocaleString()}
+            />
+            {workout?.end_time ? (
+              <DetailRow
+                label="Ended"
+                value={new Date(workout?.end_time || Date.now()).toLocaleString()}
+              />
+            ) : (null)}
+            <DetailRow
+              label="Updated at"
+              value={new Date(workout?.updated_at || Date.now()).toLocaleString()}
+            />
+            <DetailRow
+              label="Workout ID"
+              value={workout?._id.toString()}
+            />
+            <DetailRow
+              label="Public"
+              value={workout?.is_public ? "Yes" : "No"}
+            />
+            <DetailRow
+              label="Allow copying"
+              value={workout?.allow_copying ? "Yes" : "No"}
+            />
           </View>
         )
     }

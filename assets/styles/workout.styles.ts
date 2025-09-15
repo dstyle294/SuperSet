@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   exerciseDetail: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 20,
   },
   exerciseDetailText: {
     fontSize: 14,
@@ -230,6 +230,41 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+  setInfo: {
+    flex: 1,
+  },
+  setNumber: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333333',
+  },
+  setDetails: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginVertical: 2,
+  },
+  volumeText: {
+    fontSize: 12,
+    color: '#666666',
+  },
+  setItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingBottom: 12,
+    gap: 12,
+  },
+  completedSet: {
+    backgroundColor: '#E8F5E8',
+    borderColor: '#C8E6C9',
+  },
+  pendingSet: {
+    backgroundColor: '#F5F5F5',
+    borderColor: '#E0E0E0',
   },
 })
 

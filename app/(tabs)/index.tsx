@@ -113,7 +113,7 @@ export default function Home() {
       <View style={styles.postImageContainer}>
         <Image source={{uri: item.media[0].url}} style={styles.postImage}/>
       </View>
-      ) : <Text>skip</Text>}
+      ) : <></>}
 
       <View style={styles.postDetails}>
         <Text style={styles.postTitle}>{item.caption}</Text>
