@@ -166,12 +166,25 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   exerciseDetails: {
+    flexDirection: 'column',
+    gap: 16,
+    justifyContent: 'flex-start',
+  },
+  exerciseDetail: {
     flexDirection: 'row',
     gap: 16,
   },
-  exerciseDetail: {
+  exerciseDetailText: {
     fontSize: 14,
-    color: COLORS.textDark,
+    color: COLORS.textSecondary,
+    textAlign: "left",
+  },
+  toggleText: {
+    fontSize: 14,
+    color: COLORS.placeholderText
+  },
+  toggleView: {
+    flexDirection: 'row',
   },
   detailRow: {
     flexDirection: 'row',

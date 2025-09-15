@@ -1,14 +1,19 @@
-export interface exerciseObj {
-  api_exercise_id: string,
-  name: string,
-  order: number,
-  sets: number,
-  reps: number,
-  weight: number,
-  rest_time: number,
-  notes: string,
-  added_at: Date,
+export interface workoutSet {
   _id: string,
+  weight: number,
+  reps: number,
+  rest_time: number,
+  duration: number,
+  completed: boolean,
+}
+
+export interface exerciseObj {
+  api_exercise_id: String,
+  name: String,
+  order: Number,
+  sets: workoutSet[],
+  notes: String,
+  added_at: {type: Date, default: null},
 }
 
 export interface workoutObj {
