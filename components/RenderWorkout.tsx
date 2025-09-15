@@ -234,7 +234,7 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId, current
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>You cannot access this workout</Text>
+            <Text style={styles.title}>This workout has been deleted</Text>
           </View>
         </View>
       </View>

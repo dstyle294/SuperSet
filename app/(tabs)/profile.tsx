@@ -60,6 +60,14 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       <DetailRow
+        label="Username"
+        value={profile?.username}
+      />
+      <DetailRow
+        label="Email"
+        value={profile?.email}
+      />
+      <DetailRow
         label="# of workouts"
         value={workoutCount}
       />
