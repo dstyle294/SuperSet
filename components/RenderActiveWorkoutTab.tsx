@@ -225,7 +225,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
           Authorization: `Bearer ${token}`, 
           'Content-Type': 'application/json'
         }, 
-        body: JSON.stringify({ set_number: exercise.sets.length + 1, reps: null, weight: null, completed: false, notes: "" })
+        body: JSON.stringify({ sets: [{set_number: exercise.sets.length + 1, reps: null, weight: null, completed: false, notes: ""}] })
       })
 
       const data = await response.json()
@@ -233,6 +233,15 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
       if (!response.ok) {
         throw new Error(data.message || "Something went wrong")
       }
+
+      const updatedExercises = exercises.map(item => {
+        if (item._id === exercise._id) {
+          return data.exercise
+        }
+      })
+
+      setExercises(updatedExercises)
+      
     } catch (error) {
       console.log(`Error adding set ${error}`)
     }
