@@ -1,6 +1,7 @@
 import { View, Text, ActivityIndicator } from 'react-native'
 import COLORS from '../constants/colors'
 export default function Loader({ size="large" }) {
+
   return (
     <View
       style={{
@@ -10,7 +11,7 @@ export default function Loader({ size="large" }) {
         backgroundColor: COLORS.background,
       }}
     >
-      <ActivityIndicator size={20} color={COLORS.primary} />
+      <ActivityIndicator size={size} color={COLORS.primary} />
     </View>
   )
 }

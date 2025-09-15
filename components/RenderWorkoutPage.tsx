@@ -18,19 +18,22 @@ export const RenderWorkoutPage = () => {
   const [ activeTab, setActiveTab ] = useState('workout')
   const [ workoutId, setWorkoutId ] = useState("")
   const [ isWorkoutActive, setIsWorkoutActive ] = useState(false) 
+  const [ paused, setPaused ] = useState(false)
+  const [ refreshing, setRefreshing ] = useState(false)
+  const [ shouldResume, setShouldResume ] = useState(false)
   
   const renderTabContent = () => {
     switch (activeTab) {
       case 'workout': 
         return (
           <View style={[workoutStyles.tabContent, { flexDirection: 'column' }]}>
-            <RenderActiveWorkoutTab workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} />
+            <RenderActiveWorkoutTab workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} paused={paused} setPaused={setPaused} refreshing={refreshing} setRefreshing={setRefreshing} shouldResume={shouldResume} setShouldResume={setShouldResume} />
           </View>
         )
       case 'history':
         return (
           <View style={workoutStyles.tabContent}>
-            <RenderPastWorkouts workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} />
+            <RenderPastWorkouts workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} paused={paused} setPaused={setPaused} refreshing={refreshing} setRefreshing={setRefreshing} activeTab={activeTab} setActiveTab={setActiveTab} shouldResume={shouldResume} setShouldResume={setShouldResume}  />
           </View>
         )
 

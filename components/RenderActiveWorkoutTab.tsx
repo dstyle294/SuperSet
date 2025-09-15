@@ -4,7 +4,7 @@ import styles from "@/assets/styles/workoutPage.styles"
 import { API_URL } from "@/constants/api"
 import { formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/store/authStore"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { RenderAddExercise } from "./RenderAddExercise"
 
@@ -13,23 +13,45 @@ interface RenderActiveWorkoutTabProps {
   setWorkoutId: (id: string) => void,
   isWorkoutActive: boolean,
   setIsWorkoutActive: (active: boolean) => void,
+  paused: boolean,
+  setPaused: (paused: boolean) => void,
+  refreshing: boolean,
+  setRefreshing: (paused: boolean) => void,
 }
 
-export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive }) => {
+export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive, paused, setPaused, refreshing, setRefreshing, shouldResume, setShouldResume }) => {
   const { token } = useAuthStore()
 
   const [ workoutTitle, setWorkoutTitle ] = useState("")
   const [ workoutTime, setWorkoutTime ] = useState(0)
   const [ exercises, setExercises ] = useState<exerciseObj[]>([])
   const [ isEditingTitle, setIsEditingTitle ] = useState(false)
-  const [ paused, setPaused ] = useState(false)
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ workouts, setWorkouts ] = useState<workoutObj[]>([])
   const [ renderTrigger, setRenderTrigger ] = useState(0)
-  const [ refreshing, setRefreshing ] = useState(false)
   
-  
+  useEffect(() => {
+    getWorkoutById(workoutId)
+  }, [workoutId])
 
+  useEffect(() => {
+    if ( shouldResume && workoutId && isWorkoutActive ) {
+      resumeWorkout()
+      setShouldResume(false)
+    }
+  }, [shouldResume, workoutId, isWorkoutActive])
+  
+  useEffect(() => {
+    let interval = 0
+    if (isWorkoutActive && !paused) {
+      interval = setInterval(() => {
+        setWorkoutTime(prev => prev + 1)
+      }, 1000)
+    }
+
+    return () => clearInterval(interval)
+  }, [isWorkoutActive, paused, workoutId, exercises])
+  
   const capitalizeFirstLetter = (exerciseName: string) => {
     return exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)
   }
@@ -42,6 +64,30 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
           : workout
       )
     )
+  }
+
+  const getWorkoutById = async (workoutId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/${workoutId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+
+      setWorkoutTitle(data.title)
+      setWorkoutTime((new Date().getTime() - new Date(data.start_time).getTime() - data.total_pause_time) / 1000)
+      setExercises(data.exercises)
+
+    } catch (error) {
+      console.log(`Error fetching workout ${error}`)
+    }
   }
 
   const pauseWorkout = async () => {
@@ -245,7 +291,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
         </View>
 
         <ScrollView style={styles.exercisesList}>
-          {exercises.map((item) => (
+          {exercises?.map((item) => (
             <View key={item._id}>
               {renderExercise({ item })}
             </View>

@@ -1,16 +1,88 @@
 import { workoutObj } from "@/app/types/workout.types"
-import { useState } from "react"
-import { FlatList, TouchableOpacity, View } from "react-native"
+import { useEffect, useState } from "react"
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native"
+import homeStyles from '@/assets/styles/home.styles'
+import styles from "@/assets/styles/workoutPage.styles"
+import COLORS from "@/constants/colors"
+import { Ionicons } from "@expo/vector-icons"
+import { RenderWorkout } from "./RenderWorkout"
+import { API_URL } from "@/constants/api"
+import { useAuthStore } from "@/store/authStore"
+import Loader from "./loader"
 
 interface RenderPastWorkoutsProps {
   workoutId: string,
   setWorkoutId: (id: string) => void,
   isWorkoutActive: boolean, 
   setIsWorkoutActive: (active: boolean) => void,
+  paused: boolean,
+  setPaused: (paused: boolean) => void,
+  refreshing: boolean,
+  setRefreshing: (paused: boolean) => void,
+  activeTab: ['workout', 'history'],
+  setActiveTab: (tab: string) => void, 
+  shouldResume: boolean, 
+  setShouldResume: (resume: boolean) => void
 }
 
-export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive }) => {
+export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive, paused, setPaused, refreshing, setRefreshing, activeTab, setActiveTab, shouldResume, setShouldResume }) => {
+  const { token } = useAuthStore()
+  
   const [ workouts, setWorkouts ] = useState<workoutObj[]>([])
+  const [ renderTrigger, setRenderTrigger ] = useState(0)
+  const [ hasMore, setHasMore ] = useState(true) 
+  const [ loading, setLoading ] = useState(false)
+  const [ page, setPage ] = useState(0)
+  
+
+  const updateWorkoutInList = (workoutId: string, updates: Partial<workoutObj>) => {
+    setWorkouts(prevWorkouts => 
+      prevWorkouts.map(workout => 
+        workout._id === workoutId
+          ? { ...workout, ...updates }
+          : workout
+      )
+    )
+  }
+
+  const getWorkouts = async (pageNum = 1, refreshing = false) => {
+    try {
+      if ( refreshing ) setRefreshing(true)
+      else if (pageNum == 1) setLoading(true)
+
+      const response = await fetch(`${API_URL}/workouts/?page=${pageNum}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong")
+
+      const uniqueWorkouts = 
+      refreshing || pageNum === 1 
+        ? data.workouts
+        : Array.from(new Set([...workouts, ...data.workouts].map((workout) => workout._id))).map((id) => 
+          [...workouts, ...data.workouts].find((workout) => workout._id === id)
+        )
+
+      setWorkouts(uniqueWorkouts)
+
+      setHasMore(pageNum < data.totalPages)
+      setPage(pageNum)
+
+    } catch (error) {
+      console.error(`Error fetching workouts ${error}`)
+    } finally {
+      if (refreshing) {
+        setRefreshing(false)
+      } else {
+        setLoading(false)
+      }
+    }
+  }
 
   const renderWorkout = ({ item } : { item: workoutObj }) => {
     const getCurrentStatus = () => {
@@ -30,12 +102,9 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
           <TouchableOpacity
             onPress={() => {
               setIsWorkoutActive(true)
-              setWorkoutTitle(item.title)
-              setWorkoutTime((new Date().getTime() - new Date(item.start_time).getTime() - item.total_pause_time) / 1000)
-              setExercises(item.exercises)
               setWorkoutId(item._id)
               setPaused(false)
-              setRenderTrigger(prev => prev + 1)
+              setActiveTab('workout')
             }}
             style={styles.resumeButton}
           >
@@ -49,13 +118,11 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
           <TouchableOpacity 
             onPress={async () => {
               setIsWorkoutActive(true)
-              setWorkoutTitle(item.title)
-              setWorkoutTime((new Date().getTime() - new Date(item.start_time).getTime() - (item.total_pause_time)) / 1000)
-              setExercises(item.exercises)
               setWorkoutId(item._id)
               setShouldResume(true)
+              setPaused(false)
               updateWorkoutInList(item._id, { status: 'in-progress' })
-              setRenderTrigger(prev => prev + 1)
+              setActiveTab('workout')
             }}
             style={styles.resumeButton}
           >
@@ -68,6 +135,14 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
       </View>
     )
   }
+
+  const handleLoadMore = async () => {
+    if (hasMore && !loading && !refreshing) {
+      await getWorkouts(page + 1)
+    }
+  }
+
+  if (loading) return <Loader size="medium"  />
   
   return (
     <FlatList
@@ -77,7 +152,7 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
       contentContainerStyle={homeStyles.listContainer}
       showsVerticalScrollIndicator={false}
       onEndReached={handleLoadMore}
-      extraData={renderTrigger}
+      // extraData={renderTrigger}
       onEndReachedThreshold={0.1}
       ListHeaderComponent={
         <View style={homeStyles.header}>
