@@ -5,7 +5,7 @@ import styles from "@/assets/styles/workoutPage.styles"
 import homeStyles from '@/assets/styles/home.styles'
 import workoutStyles from '@/assets/styles/workout.styles'
 import { useCallback, useEffect, useRef, useState } from "react"
-import { exerciseFromSearchObj, exerciseObj } from "@/app/types/workout.types"
+import { exerciseFromSearchObj, exerciseObj } from "@/assets/types/workout.types"
 import COLORS from "@/constants/colors"
 import { API_URL } from "@/constants/api"
 import { Ionicons } from "@expo/vector-icons"

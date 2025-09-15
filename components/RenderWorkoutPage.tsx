@@ -1,4 +1,4 @@
-import { exerciseObj, workoutObj } from "@/app/types/workout.types"
+import { exerciseObj, workoutObj } from "@/assets/types/workout.types"
 import workoutStyles from "@/assets/styles/workout.styles"
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from "@/constants/api"

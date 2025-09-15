@@ -1,29 +1,17 @@
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import SafeScreen from '../components/SafeScreen'
 import { StatusBar } from 'expo-status-bar'
 import { useAuthStore } from "../store/authStore";
 import { useEffect } from "react";
-
+import NavigationHandler from '../components/NavigationHandler';
 
 export default function RootLayout() {
-  const router = useRouter()
-  const segments = useSegments()
-
-  const {checkAuth, user, token} = useAuthStore()
+  const { checkAuth } = useAuthStore();
 
   useEffect(() => {
-    checkAuth()
-  }, [])
-
-  // handle navigation based on the auth state
-  useEffect(() => {
-    const inAuthScreen = segments[0] === "(auth)"
-    const isSignedIn = user && token
-
-    if (!inAuthScreen && !isSignedIn) router.replace("/(auth)")
-    if (isSignedIn && inAuthScreen) router.replace("/(tabs)")
-  }, [user, token, segments])
+    checkAuth();
+  }, []);
 
   return (
     <SafeAreaProvider>
@@ -32,8 +20,9 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(auth)" />
         </Stack>
+        <NavigationHandler />
       </SafeScreen>
       <StatusBar style="dark" />
     </SafeAreaProvider>
-  )
+  );
 }

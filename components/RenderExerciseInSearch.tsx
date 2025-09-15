@@ -1,4 +1,4 @@
-import { exerciseFromSearchObj } from "@/app/types/workout.types"
+import { exerciseFromSearchObj } from "@/assets/types/workout.types"
 import styles from "@/assets/styles/workoutPage.styles"
 import { Ionicons } from "@expo/vector-icons"
 import { useState } from "react"

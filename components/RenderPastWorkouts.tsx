@@ -1,4 +1,4 @@
-import { workoutObj } from "@/app/types/workout.types"
+import { workoutObj } from "@/assets/types/workout.types"
 import { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native"
 import homeStyles from '@/assets/styles/home.styles'

@@ -48,7 +48,7 @@ export const RenderUser = (post: postObj) => {
   const { token } = useAuthStore()
 
   useEffect(() => {
-    const response = fetch(`${API_URL}/users/${post.post.user}`, {
+    const response = fetch(`${API_URL}/users/user/${post.post.user}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`

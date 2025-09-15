@@ -1,4 +1,4 @@
-import { exerciseObj, workoutSet } from "@/app/types/workout.types";
+import { exerciseObj, workoutSet } from "@/assets/types/workout.types";
 import styles from "@/assets/styles/workout.styles";
 import COLORS from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
