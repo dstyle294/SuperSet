@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, Image, Modal, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, FlatList,  Modal, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import SafeScreen from "./SafeScreen"
 import styles from "@/assets/styles/workoutPage.styles"
@@ -13,6 +13,7 @@ import { RenderExerciseInSearch } from "./RenderExerciseInSearch"
 import { useAuthStore } from "@/store/authStore"
 import { ExerciseInstructions } from "./ExerciseInstructions"
 import { DetailRow } from "./DetailRow"
+import { Image } from 'expo-image'
 
 interface RenderAddExerciseProps {
   showAddExercise: boolean,
@@ -357,56 +358,58 @@ export const RenderAddExercise: React.FC<RenderAddExerciseProps> = ({ showAddExe
             animationType="slide" 
             transparent={true} 
           >
-            <View style={styles.informationModalOverlay}>
-              <View style={styles.informationModalContent}>
-                <View style={styles.modalHeader}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setInformationId("")
-                      setInformationExercise(null)
-                    }}
-                    style={[styles.headerButton, { borderColor: COLORS.gray }]}
-                  >
-                    <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
-                  </TouchableOpacity>
-                </View>
-                {informationExercise && (
-                  <View>
-                    <View style={styles.gif}> 
-                      {gifLoading ? (
-                        <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
-                      ) : null} 
-                      <Image
-                        source={{ uri: informationExercise.gifUrl }}
-                        style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
-                        onLoadStart={() => setGifLoading(true)}
-                        onLoad={() => setGifLoading(false)}
-                        onError={() => setGifLoading(false)}
-                      />
-                    </View>
-                    <View style={workoutStyles.tabContent}>
-                      <View style={styles.titleContainer}>
-                        <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
-                      </View>
-                      <ExerciseInstructions instructions={informationExercise.instructions} />
-                      <DetailRow
-                        label="Body Parts"
-                        value={arrayToString(informationExercise.bodyParts)}
-                      />
-                      <DetailRow
-                        label="Target Muscles"
-                        value={arrayToString(informationExercise.targetMuscles)}
-                      />
-                      <DetailRow
-                        label="Secondary Muscles"
-                        value={arrayToString(informationExercise.secondaryMuscles)}
-                      />
-                    </View>
+            <ScrollView>
+              <View style={styles.informationModalOverlay}>
+                <View style={styles.informationModalContent}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setInformationId("")
+                        setInformationExercise(null)
+                      }}
+                      style={[styles.headerButton, { borderColor: COLORS.gray }]}
+                    >
+                      <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
+                    </TouchableOpacity>
                   </View>
-                )}
-                
+                  {informationExercise && (
+                    <View>
+                      <View style={styles.gif}> 
+                        {gifLoading ? (
+                          <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
+                        ) : null} 
+                        <Image
+                          source={{ uri: informationExercise.gifUrl }}
+                          style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
+                          onLoadStart={() => setGifLoading(true)}
+                          onLoad={() => setGifLoading(false)}
+                          onError={() => setGifLoading(false)}
+                        />
+                      </View>
+                      <View style={workoutStyles.tabContent}>
+                        <View style={styles.titleContainer}>
+                          <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
+                        </View>
+                        <ExerciseInstructions instructions={informationExercise.instructions} />
+                        <DetailRow
+                          label="Body Parts"
+                          value={arrayToString(informationExercise.bodyParts)}
+                        />
+                        <DetailRow
+                          label="Target Muscles"
+                          value={arrayToString(informationExercise.targetMuscles)}
+                        />
+                        <DetailRow
+                          label="Secondary Muscles"
+                          value={arrayToString(informationExercise.secondaryMuscles)}
+                        />
+                      </View>
+                    </View>
+                  )}
+                  
+                </View>
               </View>
-            </View>
+            </ScrollView>
           </Modal>
         </SafeScreen>
       </SafeAreaProvider>

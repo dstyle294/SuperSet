@@ -289,7 +289,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
       }
 
       setPaused(true)
-      setRenderTrigger(prev => prev + 1)
+      // setRenderTrigger(prev => prev + 1)
       
 
     } catch (error) {
@@ -320,7 +320,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
       }
 
       setPaused(false)
-      setRenderTrigger(prev => prev + 1)
+      // setRenderTrigger(prev => prev + 1)
       
 
     } catch (error) {
@@ -414,6 +414,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
         if (item._id === exercise._id) {
           return data.exercise
         }
+        return item
       })
 
       setExercises(updatedExercises)

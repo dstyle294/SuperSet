@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, FlatList, Image, Modal, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import SafeScreen from "@/components/SafeScreen"
 import styles from "@/assets/styles/workoutPage.styles"
@@ -13,6 +13,7 @@ import { RenderExerciseInSearch } from "@/components/RenderExerciseInSearch"
 import { useAuthStore } from "@/store/authStore"
 import { ExerciseInstructions } from "@/components/ExerciseInstructions"
 import { DetailRow } from "@/components/DetailRow"
+import { Image } from 'expo-image'
 
 
 export default function Exercises() {
