@@ -52,7 +52,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ( { exercise, index } )
                 >
                   <Text style={styles.setNumber}>Set {index + 1}</Text>
                   <Text style={styles.setDetails}>
-                    {set.weight} kg × {set.reps}
+                    {set.weight || 0} kg × {set.reps || 0}
                   </Text>
                   <Text style={styles.volumeText}>
                     Volume: {set.weight * set.reps} kg

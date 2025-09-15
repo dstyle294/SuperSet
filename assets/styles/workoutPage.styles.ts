@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   activeWorkoutContainer: {
-    paddingLeft: 10,
     flex: 1,
+    paddingHorizontal: 15,
   },
   workoutHeader: {
     flexDirection: 'row',
@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -72,7 +71,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-    // paddingLeft: 10,
   },
   timerText: {
     fontSize: 24,
@@ -97,7 +95,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: COLORS.textDark,
-    margin: 5,
     flex: 1, 
   },
   exerciseDetails: {
@@ -317,27 +314,56 @@ const styles = StyleSheet.create({
   },
   liveExercisesContainer: {
     flexDirection: 'column',
-    padding: 10,
+    padding: 5,
     backgroundColor: COLORS.white,
     borderRadius: 8,
-    margin: 8,
   },
   setContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 10,
+    paddingLeft: 25,
   },
   setNumber: {
     color: COLORS.textSecondary,
     fontWeight: 'bold',
     fontSize: 16,
-    marginHorizontal: 30,
-    marginBottom: 10,
+    marginRight: 20,
   },
   setInputBox: {
     height: 30,
     width: 100,
-    borderRadius: 8,
+    borderRadius: 4,
     borderWidth: 1, 
+    textAlign: 'center',
+  },
+  setMultiply: {
+    marginHorizontal: 10,
+    color: COLORS.placeholderText,
+  },
+  setBox: {
+    width: 30,
+    height: 30,
+    borderWidth: 1,
+    borderRadius: 4,
+    marginLeft: 20,
+    alignItems: 'center',
+    alignContent: 'center',
+    justifyContent: 'center',
+  },
+  addSetButton: {
+    marginVertical: 10,
+    marginHorizontal: 25,
+    height: 30,
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: 2,
+    borderWidth: 1,
+    borderStyle: 'dashed', 
+    justifyContent: 'center',
+  },
+  addSetButtonText: {
+    color: COLORS.placeholderText,
   }
 })
 

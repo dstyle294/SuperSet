@@ -8,6 +8,8 @@ import { useEffect, useState } from "react"
 import { Alert, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { RenderAddExercise } from "./RenderAddExercise"
 import Loader from "./loader"
+import COLORS from "@/constants/colors"
+import { Ionicons } from "@expo/vector-icons"
 
 interface RenderActiveWorkoutTabProps {
   workoutId: string,
@@ -87,7 +89,6 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
         throw new Error(data.message || "Something went wrong")
       }
 
-      console.log(data)
       setWorkoutTitle(data.workout.title)
       setWorkoutTime((new Date().getTime() - new Date(data.workout.start_time).getTime() - data.workout.total_pause_time) / 1000)
       setExercises(data.workout.exercises)
@@ -206,7 +207,6 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
       setIsWorkoutActive(true)
       setWorkoutTime(0)
       setExercises([])
-      console.log(data)
       setWorkoutId(data._id)
 
     } catch (error) {
@@ -217,15 +217,107 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
-  const renderSet = ({ item } : { item: workoutSet }) => {
+  const onRepChange = async (reps: number, item: workoutSet, exercise: exerciseObj) => {
+    try {
+      item.reps = reps
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets/${item._id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(item)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+      
+    } catch (error) {
+      console.log(`Error updating set reps ${error}`)
+    }
+  }
+  
+  const onWeightChange = async (weight: number, item: workoutSet, exercise: exerciseObj) => {
+    try {
+      item.weight = weight
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets/${item._id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(item)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+      
+    } catch (error) {
+      console.log(`Error updating set weight ${error}`)
+    }
+  }
+
+  const onCompletenessChange = async (set: workoutSet, exercise: exerciseObj) => {
+    try {
+      set.completed = !set.completed
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets/${set._id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(set)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+      
+    } catch (error) {
+      console.log(`Error updating set completeness ${error}`)
+    }
+  }
+
+  const renderSet = (set: workoutSet, exercise: exerciseObj) => {
     return (
       <View style={styles.setContainer}>
-        <Text style={styles.setNumber}>Set {item.set_number}</Text>
-        {/* <TextInput
+        <Text style={styles.setNumber}>Set {set.set_number}</Text>
+        <TextInput
           style={styles.setInputBox}
+          placeholder="Reps"
+          placeholderTextColor={COLORS.placeholderText}
+          value={set.reps ? set.reps.toString() : ""}
+          keyboardType="numeric"
+          onChangeText={(reps) => onRepChange(Number(reps), set, exercise)}
+        />
+        <Text style={styles.setMultiply}>x</Text>
+        <TextInput
+          style={styles.setInputBox}
+          placeholder="Weight"
+          placeholderTextColor={COLORS.placeholderText}
+          value={set.weight ? set.weight.toString() : ""}
+          keyboardType="numeric"
+          onChangeText={(weight) => onWeightChange(Number(weight), set, exercise)}
+        />
+        <TouchableOpacity 
+          style={!set.completed ? (styles.setBox) : ([styles.setBox, {backgroundColor: COLORS.green}])}
+          onPress={() => onCompletenessChange(set, exercise)}
         >
+          <Ionicons
+            name="checkmark"
+            color="white"
+            size={20}
+          />
+        </TouchableOpacity>
 
-        </TextInput> */}
       </View>
     )
   }
@@ -238,11 +330,17 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
           <Text style={styles.exerciseName}>{capitalizeFirstLetter(item.name)}</Text>
           <Text style={styles.exerciseDetails}>{completedSets} of {item.sets.length} sets completed</Text>
         </View>
-        {item.sets.map((item) => (
-          <View key={item._id}>
-            {renderSet({item})}
+        {item.sets.map((set) => (
+          <View key={set._id}>
+            {renderSet(set, item)}
           </View>
         ))}
+        <TouchableOpacity 
+          style={styles.addSetButton}
+          onPress={() => addSet(item)}
+        >
+          <Text style={styles.addSetButtonText}>+ Add Set</Text>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -286,7 +384,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
 
           <View style={styles.timerContainer}>
               <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
-              <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
+              <View style={[workoutStyles.statusBadge]}>
                 {!paused ? (
                   <>
                     <Text style={workoutStyles.statusText}>🔴</Text>

@@ -232,7 +232,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   setInfo: {
-    flex: 1,
+    flex: 1,  
+    alignContent: 'center',
   },
   setNumber: {
     fontSize: 14,
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
   },
   setItem: {
     flexDirection: 'row',
-    // alignItems: 'center',
+    alignItems: 'center',
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
