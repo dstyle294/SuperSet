@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert, SafeAreaView } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
@@ -10,9 +10,10 @@ import Loader from '@/components/loader'
 import homeStyles from '@/assets/styles/home.styles'
 import COLORS from '@/constants/colors'
 import workoutStyles from '@/assets/styles/workout.styles'
-import { addNewExercise } from '../services/exerciseServices'
 import { formatTime } from '@/lib/utils'
 import { RenderExerciseInSearch } from '@/components/RenderExerciseInSearch'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import SafeScreen from '@/components/SafeScreen'
 
 export default function Workout() {
   const { token } = useAuthStore()
@@ -31,10 +32,14 @@ export default function Workout() {
   const [ searchQuery, setSearchQuery ] = useState("")
   const [ searchResults, setSearchResults ] = useState<exerciseFromSearchObj[]>([])
   const [ isSearching, setIsSearching ] = useState(false)
+  const [ searchPage, setSearchPage ] = useState(1)
+  const [ searchRefreshing, setSearchRefreshing ] = useState(false)
+  const [ searchHasMore, setSearchHasMore ] = useState(false)
   const [ workoutId, setWorkoutId ] = useState("")
   const [ paused, setPaused ] = useState(false)
   const [ shouldResume, setShouldResume ] = useState(false)
   const [ renderTrigger, setRenderTrigger ] = useState(0)
+  const [ searchLoading, setSearchLoading ] = useState(true)
   
 
   useEffect(() => {
@@ -175,7 +180,9 @@ export default function Workout() {
   }
 
   const handleLoadMoreExercisesInSearch = async () => {
-
+    if (searchHasMore && !searchLoading && !searchRefreshing) {
+      await searchExercises(page + 1, searchQuery, searchRefreshing)
+    }
   }
 
   const addNewExercise = async () => {
@@ -332,11 +339,11 @@ export default function Workout() {
     timeoutRef.current = setTimeout(() => {
       console.log(`Searching for ${query}`)
 
-      searchExercises(query)
+      searchExercises(searchPage, query, searchRefreshing)
     }, 500)
   }, [])
 
-  const searchExercises = async (query: string) => {
+  const searchExercises = async (pageNum = 1, query: string, searchRefreshing = false) => {
     if (!query.trim()) {
       setSearchResults([])
       return ;
@@ -354,7 +361,14 @@ export default function Workout() {
 
       if (!response.ok) throw new Error(data.message || "Something went wrong!")
 
+      console.log(data)
+
       setSearchResults(data.exercises.data)
+
+      // change backend to return page num, totalpages
+
+      setSearchHasMore(pageNum < data.totalPages)
+      setSearchPage(pageNum)
 
         
     } catch (error) {
@@ -474,68 +488,72 @@ export default function Workout() {
         transparent={true}
         onRequestClose={() => setShowAddExercise(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Exercise</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowAddExercise(false)
-                  setSearchQuery('')
-                  setSearchResults([])
-                }}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={20} color={COLORS.red} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.modalInputBox}>
-              <TextInput  
-                style={styles.modalInput}
-                placeholder="Search exercises (e.g. push up)"
-                value={searchQuery}
-                onChangeText={handleSearchInput}
-                autoFocus
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => {
-                    setSearchQuery('')
-                    setSearchResults([])
-                  }}
-                  style={styles.clearButton}
-                >
-                  <Ionicons name="close" size={16} color={COLORS.textDark} />
-                </TouchableOpacity>
-              )}
-            </View>
-            {searchQuery.length > 0 ? (
-              <FlatList 
-                data={searchResults}
-                renderItem={renderExerciseInSearch}
-                keyExtractor={(item: exerciseFromSearchObj) => item.id}
-                contentContainerStyle={homeStyles.listContainer}
-                showsVerticalScrollIndicator={true}
-                onEndReached={handleLoadMoreExercisesInSearch}
-                onEndReachedThreshold={0.1}
-                ListEmptyComponent={
-                  <View style={homeStyles.emptyContainer}>
-                    <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
+        <SafeAreaProvider>
+          <SafeScreen>
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Add Exercise</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShowAddExercise(false)
+                      setSearchQuery('')
+                      setSearchResults([])
+                    }}
+                    style={styles.closeButton}
+                  >
+                    <Ionicons name="close" size={20} color={COLORS.red} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.modalInputBox}>
+                  <TextInput  
+                    style={styles.modalInput}
+                    placeholder="Search exercises (e.g. push up)"
+                    value={searchQuery}
+                    onChangeText={handleSearchInput}
+                    autoFocus
+                  />
+                  {searchQuery.length > 0 && (
                     <TouchableOpacity
-                      onPress={addNewExercise}
-                      style={styles.addButton}
+                      onPress={() => {
+                        setSearchQuery('')
+                        setSearchResults([])
+                      }}
+                      style={styles.clearButton}
                     >
-                      <Text style={styles.addButtonText}>Add new exercise</Text>
+                      <Ionicons name="close" size={16} color={COLORS.textDark} />
                     </TouchableOpacity>
-                  </View>
-                }
-              />
-            ) : (
-              null
-            )}
-            
-          </View>
-        </View>
+                  )}
+                </View>
+                {searchQuery.length > 0 ? (
+                  <FlatList 
+                    data={searchResults}
+                    renderItem={renderExerciseInSearch}
+                    keyExtractor={(item: exerciseFromSearchObj) => item.exerciseId}
+                    contentContainerStyle={homeStyles.listContainer}
+                    showsVerticalScrollIndicator={true}
+                    onEndReached={handleLoadMoreExercisesInSearch}
+                    onEndReachedThreshold={0.1}
+                    ListEmptyComponent={
+                      <View style={homeStyles.emptyContainer}>
+                        <Text style={homeStyles.emptyText}>No exercises for this search 😞</Text>
+                        <TouchableOpacity
+                          onPress={addNewExercise}
+                          style={styles.addButton}
+                        >
+                          <Text style={styles.addButtonText}>Add new exercise</Text>
+                        </TouchableOpacity>
+                      </View>
+                    }
+                  />
+                ) : (
+                  null
+                )}
+                
+              </View>
+            </View>
+          </SafeScreen>
+        </SafeAreaProvider>
       </Modal>
       <FlatList
         data={workouts} 

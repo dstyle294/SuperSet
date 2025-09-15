@@ -18,17 +18,15 @@ export interface exerciseObj {
 }
 
 export interface exerciseFromSearchObj {
-  bodyPart: string,
-  "upper arms": string,
-  category: string,
-  description: string,
-  difficulty: string,
-  equipment: string,
-  id: string,
+  bodyParts: string[],
+  equipments: string[],
+  exerciseId: string,
   instructions: string[],
   name: string,
   secondaryMuscles: string[],
   target: string,
+  gifUrl: string,
+  targetMuscles: string[],
 }
 
 export interface workoutObj {
