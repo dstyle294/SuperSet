@@ -6,6 +6,7 @@ import { Text, TouchableOpacity, View } from "react-native"
 import { StatCard } from "./StatCard"
 import { Badge } from "./Badge"
 import { exerciseObj, workoutObj } from "@/app/types/workout.types"
+import { ExerciseCard } from "./ExerciseCard"
 
 
 
@@ -99,9 +100,9 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
       case 'exercises':
         return (
           <View style={styles.tabContent}>
-            {workout?.exercises.map((exercise, index) => {
+            {workout?.exercises.map((exercise, index) => (
               <ExerciseCard key={index} exercise={exercise} index={index} />
-            })}
+            ))}
           </View>
         )
     }
