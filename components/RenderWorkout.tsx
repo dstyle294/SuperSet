@@ -16,6 +16,7 @@ import { DetailRow } from "./DetailRow"
 
 interface RenderWorkoutProps {
   workoutId: string,
+  currentStatus?: string
 }
 
 const getStatusStyle = (status: (string | undefined)) => {
@@ -61,11 +62,13 @@ const formatDuration = (startTime: (string | undefined), total_duration: (number
   return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
 }
 
-export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
+export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId, currentStatus }) => {
   const { token } = useAuthStore()
   const [workout, setWorkout] = useState<workoutObj|null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [activeTab, setActiveTab] = useState('overview')
+
+  const status = currentStatus || workout?.status
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -194,9 +197,9 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId }) => {
       <View style={styles.content}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{workout?.title}</Text>
-          <View style={[styles.statusBadge, getStatusStyle(workout?.status)]}>
-            <Text style={[styles.statusText, getStatusTextStyle(workout?.status)]}>
-              {workout.status === 'in-progress' ? '▶️' : workout.status === 'completed' ? '✅' : '⏸️'} {workout.status.replace('-', ' ')}
+          <View style={[styles.statusBadge, getStatusStyle(status)]}>
+            <Text style={[styles.statusText, getStatusTextStyle(status)]}>
+              {status === 'in-progress' ? '▶️' : status === 'completed' ? '✅' : '⏸️'} {status?.replace('-', ' ')}
             </Text>
           </View>
         </View>

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput, Modal, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
@@ -25,28 +25,105 @@ export default function Workout() {
   const [ exercises, setExercises ] = useState<exerciseObj[]>([])
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ newExerciseName, setNewExerciseName ] = useState("")
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ searchResults, setSearchResults ] = useState([])
+  const [ isSearching, setIsSearching ] = useState(false)
+  const [ workoutId, setWorkoutId ] = useState("")
+  const [ paused, setPaused ] = useState(false)
+  const [ shouldResume, setShouldResume ] = useState(false)
+  const [ renderTrigger, setRenderTrigger ] = useState(0)
+  
 
   useEffect(() => {
     let interval = 0
-    if (isWorkoutActive) {
+    if (isWorkoutActive && !paused) {
       interval = setInterval(() => {
         setWorkoutTime(prev => prev + 1)
       }, 1000)
     }
+
+    if ( shouldResume && workoutId && isWorkoutActive ) {
+      resumeWorkout()
+      setShouldResume(false)
+    }
+
+
+
     return () => clearInterval(interval)
-  }, [isWorkoutActive])
+  }, [isWorkoutActive, paused, shouldResume, workoutId])
+
+  const updateWorkoutInList = (workoutId: string, updates: Partial<workoutObj>) => {
+    setWorkouts(prevWorkouts => 
+      prevWorkouts.map(workout => 
+        workout._id === workoutId
+          ? { ...workout, ...updates }
+          : workout
+      )
+    )
+  }
 
 
-  const renderWorkout = ({ item } : {item: workoutObj}) => (
-    <View style={homeStyles.postCard}>
-      <RenderWorkout workoutId={item._id} />
-    </View>
-  )
+  const renderWorkout = ({ item } : {item: workoutObj}) => {
+    const getCurrentStatus = () => {
+      if (item._id === workoutId && isWorkoutActive) {
+        return paused ? 'paused' : 'in-progress'
+      }
+      return item.status
+    }
+
+    const currentStatus = getCurrentStatus()
+
+    return (
+      <View style={homeStyles.postCard}>
+        
+
+        {currentStatus === 'in-progress' ? (
+          <TouchableOpacity
+            onPress={() => {
+              setIsWorkoutActive(true)
+              setWorkoutTitle(item.title)
+              setWorkoutTime((new Date().getTime() - new Date(item.start_time).getTime() - item.total_pause_time) / 1000)
+              setExercises(item.exercises)
+              setWorkoutId(item._id)
+              setPaused(false)
+              setRenderTrigger(prev => prev + 1)
+            }}
+            style={styles.resumeButton}
+          >
+            <Text style={styles.controlButtonText}>Continue?</Text>
+          </TouchableOpacity>
+        ) : (
+          null
+        )}
+
+        {currentStatus === 'paused' ? (
+          <TouchableOpacity 
+            onPress={async () => {
+              setIsWorkoutActive(true)
+              setWorkoutTitle(item.title)
+              setWorkoutTime((new Date().getTime() - new Date(item.start_time).getTime() - (item.total_pause_time)) / 1000)
+              setExercises(item.exercises)
+              setWorkoutId(item._id)
+              setShouldResume(true)
+              updateWorkoutInList(item._id, { status: 'in-progress' })
+              setRenderTrigger(prev => prev + 1)
+            }}
+            style={styles.resumeButton}
+          >
+            <Text style={styles.controlButtonText}>Resume? ▶️</Text>
+          </TouchableOpacity>
+        ) : (
+          null
+        )}
+        <RenderWorkout workoutId={item._id} currentStatus={currentStatus} />
+      </View>
+    )
+  }
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+    const secs = Math.floor(seconds % 60)
 
     if (hours > 0) {
       return `${hours}h ${minutes}m ${secs}s`
@@ -59,7 +136,7 @@ export default function Workout() {
       if ( refreshing ) setRefreshing(true)
       else if (pageNum == 1) setLoading(true)
 
-      const response = await fetch(`${API_URL}/workouts/`, {
+      const response = await fetch(`${API_URL}/workouts/?page=${pageNum}`, {
         headers: {
           method: 'GET',
           Authorization: `Bearer ${token}`
@@ -103,21 +180,125 @@ export default function Workout() {
     }
   }
 
-  const pauseWorkout = () => {
-    setIsWorkoutActive(false)
+  const pauseWorkout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/pause/${workoutId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+
+      if (workoutId) {
+        updateWorkoutInList(workoutId, { status: 'paused' })
+      }
+
+      setPaused(true)
+      setRenderTrigger(prev => prev + 1)
+      
+
+    } catch (error) {
+      console.log("Error pausing workout", error)
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message)
+      }
+    }
   }
 
-  const endWorkout = () => {
-    setIsWorkoutActive(false)
-    setWorkoutTime(0)
-    setExercises([])
-    setWorkoutTitle('')
+  const resumeWorkout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/resume/${workoutId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      console.log(response)
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+
+      if (workoutId) {
+        updateWorkoutInList(workoutId, { status: 'in-progress' })
+      }
+
+      setPaused(false)
+      setRenderTrigger(prev => prev + 1)
+      
+
+    } catch (error) {
+      console.log("Error resuming workout", error)
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message)
+      }
+    }
   }
 
-  const startWorkout = () => {
-    setIsWorkoutActive(true)
-    setWorkoutTime(0)
-    setExercises([])
+  const endWorkout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/end/${workoutId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+
+      if (workoutId) {
+        updateWorkoutInList(workoutId, { status: 'completed' })
+      }
+
+      setIsWorkoutActive(false)
+      setWorkoutTime(0)
+      setExercises([])
+      setWorkoutTitle('')
+      setWorkoutId("")
+      setRenderTrigger(prev => prev + 1)
+
+    } catch (error) {
+      console.log("Error ending workout", error)
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message)
+      }
+    }
+    
+  }
+
+  const startWorkout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/start`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+      
+      setIsWorkoutActive(true)
+      setWorkoutTime(0)
+      setExercises([])
+      console.log(data)
+      setWorkoutId(data._id)
+
+    } catch (error) {
+      console.log("Error starting workout", error)
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message)
+      }
+    }
+    
   }
 
   const addExercise = () => {
@@ -127,13 +308,28 @@ export default function Workout() {
         sets: [],
         _id: "Date.now()",
         name: newExerciseName,
-        order: 0,
+        order: exercises.length + 1,
         added_at: new Date(),
         notes: "",
       }
       setExercises([...exercises, newExercise])
       setNewExerciseName('')
       setShowAddExercise(false)
+    }
+  }
+
+  const searchExercises = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      return ;
+    }
+
+    setIsSearching(true)
+
+    try {
+      
+    } catch (error) {
+      
     }
   }
   
@@ -176,8 +372,18 @@ export default function Workout() {
           <View style={styles.timerContainer}>
               <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
               <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
-                <Text style={workoutStyles.statusText}>🔴</Text>
-                <Text style={workoutStyles.statusText}>in progress</Text>
+                {!paused ? (
+                  <>
+                    <Text style={workoutStyles.statusText}>🔴</Text>
+                    <Text style={workoutStyles.statusText}>in progress</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={workoutStyles.statusText}>⏸️</Text>
+                    <Text style={workoutStyles.statusText}>paused</Text>
+                  </>
+                )}
+                
               </View>
           </View>
 
@@ -198,12 +404,22 @@ export default function Workout() {
           </View>
 
           <View style={styles.workoutControls}>
-              <TouchableOpacity
-                style={styles.pauseButton}
-                onPress={pauseWorkout}
-              >
-                <Text style={styles.controlButtonText}>⏸️ Pause</Text>
+              {!paused ? (
+                <TouchableOpacity
+                  style={styles.pauseButton}
+                  onPress={pauseWorkout}
+                >
+                  <Text style={styles.controlButtonText}>⏸️ Pause</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.resumeButton}
+                  onPress={resumeWorkout}
+                >
+                <Text style={styles.controlButtonText}>▶️ Resume</Text>
               </TouchableOpacity>
+              )}
+              
               <TouchableOpacity
                 style={styles.endButton}
                 onPress={endWorkout}
@@ -256,6 +472,7 @@ export default function Workout() {
         contentContainerStyle={homeStyles.listContainer}
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
+        extraData={renderTrigger}
         onEndReachedThreshold={0.1}
         ListHeaderComponent={
           <View style={homeStyles.header}>

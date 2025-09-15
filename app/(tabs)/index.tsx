@@ -39,8 +39,6 @@ interface postOfArray {
   }
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
 export default function Home() {
   
   const [ posts, setPosts ] = useState<postObj[]>([])
