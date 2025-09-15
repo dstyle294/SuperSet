@@ -24,6 +24,8 @@ interface RenderActiveWorkoutTabProps {
   setShouldResume: (resume: boolean) => void
 }
 
+
+
 export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive, paused, setPaused, refreshing, setRefreshing, shouldResume, setShouldResume }) => {
   const { token } = useAuthStore()
 
@@ -34,9 +36,14 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ workouts, setWorkouts ] = useState<workoutObj[]>([])
   const [ renderTrigger, setRenderTrigger ] = useState(0)
-  const lastTap = useRef(null)
+  const lastTap = useRef<number>(null)
+  const [ currentHint, setCurrentHint ] = useState(0)
 
   const DOUBLE_TAP_DELAY = 300 // ms
+  const hints = [
+    "💡 Tip: Long press any workout to delete it",
+    "👆 Double tap sets to delete them"
+  ]
   
   useEffect(() => {
     getWorkoutById(workoutId)
@@ -57,8 +64,24 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
       }, 1000)
     }
 
-    return () => clearInterval(interval)
+
+    return () => {
+      clearInterval(interval)
+    }
   }, [isWorkoutActive, paused, workoutId, exercises])
+
+  useEffect(() => {
+    let hintsInterval = 0
+    if (isWorkoutActive) {
+      hintsInterval = setInterval(() => {
+        setCurrentHint((prev) => (prev + 1) % hints.length)
+      }, 5000)
+    }
+
+    return () => {
+      clearInterval(hintsInterval)
+    }
+  }, [])
   
   const capitalizeFirstLetter = (exerciseName: string) => {
     return exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)
@@ -125,8 +148,28 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
+  const deleteSet = async (exerciseId: string, setId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exerciseId}/sets/${setId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+
+    } catch (error) {
+      console.log(`Error deleting set ${error}`)
+      Alert.alert("Error", "Couldn't delete set")
+    }
+  }
+
   const confirmDelete = (exerciseId: string) => {
-    console.log(exerciseId)
     Alert.alert(
       "Delete?", 
       "Are you sure you want to delete this exercise?",
@@ -142,6 +185,33 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
             setRefreshing(true)
             try {
               await deleteExercise(exerciseId)
+              await getWorkoutById(workoutId, true)
+            } finally {
+              setRefreshing(false)
+            }
+          } 
+        }
+      ], 
+      { cancelable: false }
+    )
+  }
+
+  const confirmSetDelete = (exerciseId: string, setId: string) => {
+    Alert.alert(
+      "Delete?", 
+      "Are you sure you want to delete this set?",
+      [ 
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setRefreshing(true)
+            try {
+              await deleteSet(exerciseId, setId)
               await getWorkoutById(workoutId, true)
             } finally {
               setRefreshing(false)
@@ -376,13 +446,19 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
-  const handleSetTap = () => {
-
+  const handleSetTap = (exerciseId: string, setId: string) => {
+    const now = Date.now()
+    if (lastTap.current && (now - lastTap.current) < DOUBLE_TAP_DELAY) {
+      confirmSetDelete(exerciseId, setId)
+      lastTap.current = null
+    } else {
+      lastTap.current = now
+    }
   }
 
   const renderSet = (set: workoutSet, exercise: exerciseObj) => {
     return (
-      <TouchableOpacity style={styles.setContainer} onPress={handleSetTap}>
+      <TouchableOpacity style={styles.setContainer} onPress={() => handleSetTap(exercise._id, set._id)}>
         <Text style={styles.setNumber}>Set {set.set_number}</Text>
         <TextInput
           style={styles.setInputBox}
@@ -562,7 +638,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
 
           <View style={styles.hints}>
               <Text style={styles.hintText}>
-                💡 Tip: Long press any exercise to delete it
+                {hints[currentHint]}
               </Text>
           </View>
         </View>
