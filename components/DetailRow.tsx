@@ -9,6 +9,6 @@ interface DetailRowProps {
 export const DetailRow: React.FC<DetailRowProps> = ({ label, value }) => (
   <View style={styles.detailRow}>
     <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value}</Text>
+    <Text style={styles.detailValue} >{value}</Text>
   </View>
 )

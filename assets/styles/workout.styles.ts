@@ -198,6 +198,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textDark,
     fontWeight: '500',
+    flexShrink: 1,
+    textAlign: 'right',
   },
   actionContainer: {
     marginTop: 24,

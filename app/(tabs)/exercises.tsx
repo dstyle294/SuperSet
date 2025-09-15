@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, FlatList, Image, Modal, RefreshControl, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Alert, FlatList, Image, Modal, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import SafeScreen from "@/components/SafeScreen"
 import styles from "@/assets/styles/workoutPage.styles"
@@ -174,20 +174,9 @@ export default function Exercises() {
   }
 
   const renderExerciseInSearch = ({ item } : { item: exerciseFromSearchObj }) => {
-    const thisIsSelected = item.exerciseId === selectedExerciseId 
 
     return (
-      <TouchableOpacity
-        onPress={() => {
-          if (selectedExerciseId === item.exerciseId) {
-            setSelectedExerciseId("")
-          } else {
-            setSelectedExerciseId(item.exerciseId)
-          }
-        }}
-      >
-        <RenderExerciseInSearch exercise={item} isSelected={thisIsSelected} setInformationId={setInformationId} />
-      </TouchableOpacity>
+      <RenderExerciseInSearch exercise={item} setInformationId={setInformationId} />
     )
   }
 
@@ -280,56 +269,62 @@ export default function Exercises() {
           animationType="slide" 
           transparent={true} 
         >
-          <View style={styles.informationModalOverlay}>
-            <View style={styles.informationModalContent}>
-              <View style={styles.modalHeader}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setInformationId("")
-                    setInformationExercise(null)
-                  }}
-                  style={[styles.headerButton, { borderColor: COLORS.gray }]}
-                >
-                  <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
-                </TouchableOpacity>
-              </View>
-              {informationExercise && (
-                <View>
-                  <View style={styles.gif}> 
-                    {gifLoading ? (
-                      <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
-                    ) : null} 
-                    <Image
-                      source={{ uri: informationExercise.gifUrl }}
-                      style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
-                      onLoadStart={() => setGifLoading(true)}
-                      onLoad={() => setGifLoading(false)}
-                      onError={() => setGifLoading(false)}
-                    />
+          <SafeAreaProvider>
+            <SafeScreen>
+              <ScrollView>
+              <View style={styles.informationModalOverlay}>
+                <View style={styles.informationModalContent}>
+                  <View style={styles.modalHeader}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setInformationId("")
+                        setInformationExercise(null)
+                      }}
+                      style={[styles.headerButton, { borderColor: COLORS.gray }]}
+                    >
+                      <Ionicons name="arrow-back" size={24} color={COLORS.gray} />
+                    </TouchableOpacity>
                   </View>
-                  <View style={workoutStyles.tabContent}>
-                    <View style={styles.titleContainer}>
-                      <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
+                  {informationExercise && (
+                    <View>
+                      <View style={styles.gif}> 
+                        {gifLoading ? (
+                          <ActivityIndicator size="large" color={COLORS.primary} style={{ justifyContent: 'center' }} />
+                        ) : null} 
+                        <Image
+                          source={{ uri: informationExercise.gifUrl }}
+                          style={{ width: 200, height: 200, resizeMode: 'contain', justifyContent: 'center' }}
+                          onLoadStart={() => setGifLoading(true)}
+                          onLoad={() => setGifLoading(false)}
+                          onError={() => setGifLoading(false)}
+                        />
+                      </View>
+                      <View style={workoutStyles.tabContent}>
+                        <View style={styles.titleContainer}>
+                          <Text style={styles.informationHeading}>{capitalizeFirstLetter(informationExercise.name)}</Text>
+                        </View>
+                        <ExerciseInstructions instructions={informationExercise.instructions} />
+                        <DetailRow
+                          label="Body Parts"
+                          value={arrayToString(informationExercise.bodyParts)}
+                        />
+                        <DetailRow
+                          label="Target Muscles"
+                          value={arrayToString(informationExercise.targetMuscles)}
+                        />
+                        <DetailRow
+                          label="Secondary Muscles"
+                          value={arrayToString(informationExercise.secondaryMuscles)}
+                        />
+                      </View>
                     </View>
-                    <ExerciseInstructions instructions={informationExercise.instructions} />
-                    <DetailRow
-                      label="Body Parts"
-                      value={arrayToString(informationExercise.bodyParts)}
-                    />
-                    <DetailRow
-                      label="Target Muscles"
-                      value={arrayToString(informationExercise.targetMuscles)}
-                    />
-                    <DetailRow
-                      label="Secondary Muscles"
-                      value={arrayToString(informationExercise.secondaryMuscles)}
-                    />
-                  </View>
+                  )}
+                  
                 </View>
-              )}
-              
-            </View>
-          </View>
+              </View>
+              </ScrollView>
+            </SafeScreen>
+          </SafeAreaProvider>
         </Modal>
 
       </SafeScreen>

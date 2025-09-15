@@ -6,7 +6,7 @@ import { Text, View } from "react-native"
 
 interface RenderExerciseInSearchProps {
   exercise: exerciseFromSearchObj,
-  isSelected: boolean,
+  isSelected?: boolean,
   setInformationId: (exerciseId: string) => void,
 }
 
