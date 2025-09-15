@@ -1,14 +1,15 @@
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, RefreshControl, Touchable, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import styles from '@/assets/styles/workoutPage.styles'
 import { API_URL } from '@/constants/api'
 import { useAuthStore } from '@/store/authStore'
-import { workoutObj } from '../types/workout.types'
+import { exerciseObj, workoutObj } from '../types/workout.types'
 import { RenderWorkout } from '@/components/RenderWorkout'
 import { Ionicons } from '@expo/vector-icons'
 import Loader from '@/components/loader'
 import homeStyles from '@/assets/styles/home.styles'
 import COLORS from '@/constants/colors'
+import workoutStyles from '@/assets/styles/workout.styles'
 
 export default function Workout() {
   const { token } = useAuthStore()
@@ -17,16 +18,40 @@ export default function Workout() {
   const [ refreshing, setRefreshing ] = useState(false)
   const [ page, setPage ] = useState(1)
   const [ hasMore, setHasMore ] = useState(true) 
+  const [ isWorkoutActive, setIsWorkoutActive ] = useState(false)
+  const [ isEditingTitle, setIsEditingTitle ] = useState(false)
+  const [ workoutTitle, setWorkoutTitle ] = useState("")
+  const [ workoutTime, setWorkoutTime ] = useState(0)
+  const [ exercises, setExercises ] = useState<exerciseObj[]>([])
+  const [ showAddExercise, setShowAddExercise ] = useState(false)
 
-  const startWorkout = () => {
-    
-  }
+  useEffect(() => {
+    let interval = 0
+    if (isWorkoutActive) {
+      interval = setInterval(() => {
+        setWorkoutTime(prev => prev + 1)
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [isWorkoutActive])
+
 
   const renderWorkout = ({ item } : {item: workoutObj}) => (
     <View style={homeStyles.postCard}>
       <RenderWorkout workoutId={item._id} />
     </View>
   )
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`
+    }
+    return `${minutes}m ${secs}s`
+  }
 
   const getWorkouts = async (pageNum = 1, refreshing = false) => {
     try {
@@ -72,19 +97,108 @@ export default function Workout() {
   }, [])
 
   const handleLoadMore = async () => {
-      if (hasMore && !loading && !refreshing) {
-        await getWorkouts(page + 1)
-      }
+    if (hasMore && !loading && !refreshing) {
+      await getWorkouts(page + 1)
     }
+  }
+
+  const pauseWorkout = () => {
+    setIsWorkoutActive(false)
+  }
+
+  const endWorkout = () => {
+    setIsWorkoutActive(false)
+    setWorkoutTime(0)
+    setExercises([])
+    setWorkoutTitle('')
+  }
+
+  const startWorkout = () => {
+    setIsWorkoutActive(true)
+    setWorkoutTime(0)
+    setExercises([])
+  }
   
   if (loading) return <Loader size="small" />
 
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={startWorkout} style={styles.startButton}>
-        <Text style={styles.startButtonText}>Start workout!</Text>
-      </TouchableOpacity>
+      {!isWorkoutActive ? (
+        <View style={styles.startWorkoutContainer}>
+          <Text style={styles.startWorkoutTitle}>Ready to crush it?</Text>
+          <TouchableOpacity onPress={startWorkout} style={styles.startButton}>
+            <Text style={styles.startButtonText}>🔥 Start workout!</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.activeWorkoutContainer}>
+          <View style={styles.workoutHeader}>
+            <TouchableOpacity 
+              onPress={() => setIsEditingTitle(true)}
+              style={styles.titleContainer}
+            >
+              {isEditingTitle ? (
+                <TextInput
+                  style={styles.titleInput}
+                  value={workoutTitle}
+                  onChangeText={setWorkoutTitle}
+                  onBlur={() => setIsEditingTitle(false)}
+                  autoFocus
+                />
+              ) : (
+                <Text style={styles.activeWorkoutTitle}>{workoutTitle}</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.photoButton}>
+              <Text style={styles.photoButtonText}>📸</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.timerContainer}>
+              <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
+              <View style={workoutStyles.statusBadge}>
+                <Text style={workoutStyles.statusText}>🔴</Text>
+                <Text style={workoutStyles.statusText}>in progress</Text>
+              </View>
+          </View>
+
+          <View style={styles.exercisesList}>
+              {exercises.map(exercise => (
+                <View key={exercise._id} style={styles.exerciseItem}>
+                  <Text style={styles.exerciseName}>{exercise.name}</Text>
+                  <Text style={styles.exerciseDetails}>0 sets</Text>
+                </View>
+              ))}
+
+              <TouchableOpacity 
+                style={styles.addExerciseButton}
+                onPress={() => setShowAddExercise(false)}
+              >
+                <Text style={styles.addExerciseText}>+ Add Exercise</Text>
+              </TouchableOpacity>
+          </View>
+
+          <View style={styles.workoutControls}>
+              <TouchableOpacity
+                style={styles.pauseButton}
+                onPress={pauseWorkout}
+              >
+                <Text style={styles.controlButtonText}>⏸️ Pause</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.endButton}
+                onPress={endWorkout}
+              >
+                <Text style={styles.controlButtonText}>🏁 End Workout</Text>
+              </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Add Exercise Modal */}
+      
+
       <FlatList
         data={workouts} 
         renderItem={renderWorkout}
