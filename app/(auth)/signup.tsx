@@ -1,18 +1,28 @@
-import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import React, { useState } from 'react'
 import styles from '../../assets/styles/signup.styles'
 import { Ionicons } from '@expo/vector-icons'
 import COLORS from '../../constants/colors'
 import { router } from 'expo-router'
+import { useAuthStore } from "../../store/authStore"
 
 export default function signup() {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const {user, isLoading, register} = useAuthStore()
 
-  const handleSignup = () => {}
+
+
+  const handleSignup = async () => {
+    console.log(name)
+    const result = await register(name, username, email, password)
+
+    if (!result.success) Alert.alert("Error", result.error)
+  }
+
 
   return (
     <KeyboardAvoidingView
@@ -28,6 +38,27 @@ export default function signup() {
           </View>
 
           <View style={styles.formContainer}>
+            {/* NAME INPUT */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Name</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons
+                  name="id-card-outline"
+                  size={20}
+                  color={COLORS.primary}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Sir Lifts A Lot"
+                  placeholderTextColor={COLORS.placeholderText}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+              </View>
+            </View>
+
             {/* USERNAME INPUT */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Username</Text>
@@ -51,7 +82,7 @@ export default function signup() {
 
             {/* EMAIL INPUT */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Username</Text>
+              <Text style={styles.label}>Email</Text>
               <View style={styles.inputContainer}>
                 <Ionicons 
                   name="mail-outline"
