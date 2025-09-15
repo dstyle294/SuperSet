@@ -6,6 +6,23 @@ export const useAuthStore = create((set) => ({
   user: null,
   token: null,
   isLoading: false,
+  isInitialized: false,
+
+  initializeAuth: async () => {
+    try {
+      set({ isLoading: true });
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        // Validate token and get user data
+        const userData = await AsyncStorage.getItem('user');
+        set({ user: userData, token, isLoading: false, isInitialized: true });
+      } else {
+        set({ user: null, token: null, isLoading: false, isInitialized: true });
+      }
+    } catch (error) {
+      set({ user: null, token: null, isLoading: false, isInitialized: true });
+    }
+  },
   
   register: async (name, username, email, password) => {
 
@@ -82,12 +99,10 @@ export const useAuthStore = create((set) => ({
       const userJson = await AsyncStorage.getItem("user") 
       const user = userJson ? JSON.parse(userJson) : null
 
-      console.log(token)
-
-      set({ token, user, isLoading: false })
+      set({ token, user, isLoading: false, isInitialized: true  })
     } catch (error) {
       console.log("Auth check failed", error)
-      set({ token: null, user: null, isLoading: false })
+      set({ token: null, user: null, isLoading: false, isInitialized: true })
     }
   },
 

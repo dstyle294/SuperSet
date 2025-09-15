@@ -1,5 +1,5 @@
 // app/index.tsx
-import { useRouter } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
@@ -7,9 +7,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 
 export default function IndexScreen() {
-  const router = useRouter();
-  const { user, token, isLoading, checkAuth } = useAuthStore();
+
+  const { user, token, isLoading, checkAuth, isInitialized } = useAuthStore();
   const [isReady, setIsReady] = useState(false);
+
 
   // Use useFocusEffect to ensure navigation happens when screen is focused
   useFocusEffect(
@@ -17,6 +18,9 @@ export default function IndexScreen() {
       checkAuth();
     }, [])
   );
+
+
+
 
   useEffect(() => {
     // Add a small delay to ensure everything is mounted
@@ -27,8 +31,10 @@ export default function IndexScreen() {
     return () => clearTimeout(timer);
   }, []);
 
+
+
   useEffect(() => {
-    if (isReady && !isLoading) {
+    if (isReady && !isLoading && isInitialized) {
       // Use requestAnimationFrame to ensure navigation happens after render
       requestAnimationFrame(() => {
         if (user && token) {
@@ -38,7 +44,8 @@ export default function IndexScreen() {
         }
       });
     }
-  }, [user, token, isLoading, isReady, router]);
+  }, [isReady, isLoading, user, token, isInitialized ]);
+
 
   // Show loading screen while checking auth
   return (

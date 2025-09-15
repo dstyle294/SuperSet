@@ -1,5 +1,5 @@
 import { workoutObj } from "@/assets/types/workout.types"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native"
 import homeStyles from '@/assets/styles/home.styles'
 import styles from "@/assets/styles/workoutPage.styles"
@@ -9,6 +9,7 @@ import { RenderWorkout } from "./RenderWorkout"
 import { API_URL } from "@/constants/api"
 import { useAuthStore } from "@/store/authStore"
 import Loader from "./loader"
+import { useFocusEffect } from "expo-router"
 
 interface RenderPastWorkoutsProps {
   workoutId: string,
