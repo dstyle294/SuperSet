@@ -146,7 +146,7 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
     }
   }
 
-  if (loading) return <Loader size="medium"  />
+  if (loading) return <Loader size="large"  />
   
   return (
     <FlatList
