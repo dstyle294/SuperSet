@@ -50,7 +50,8 @@ const COLORS = {
   blue: '#3b82f6',
   orange: '#FF9800',
   lightGrey: '#e0e0e0',
-  lightRed: ''
+  gray: 'gray',
+  lighterGrey: '#f0f0f0'
 };
 
 
