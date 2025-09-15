@@ -1,13 +1,16 @@
 import styles from "@/assets/styles/workout.styles"
+import workoutPageStyles from "@/assets/styles/workoutPage.styles"
 import { API_URL } from "@/constants/api"
 import { useAuthStore } from "@/store/authStore"
 import { useEffect, useState } from "react"
-import { Text, TouchableOpacity, View } from "react-native"
+import { Alert, Text, TouchableOpacity, View } from "react-native"
 import { StatCard } from "./StatCard"
 import { Badge } from "./Badge"
 import { exerciseObj, workoutObj } from "@/app/types/workout.types"
 import { ExerciseCard } from "./ExerciseCard"
 import { DetailRow } from "./DetailRow"
+import { Ionicons } from "@expo/vector-icons"
+import COLORS from "@/constants/colors"
 
 
 
@@ -16,7 +19,9 @@ import { DetailRow } from "./DetailRow"
 
 interface RenderWorkoutProps {
   workoutId: string,
-  currentStatus?: string
+  currentStatus?: string,
+  personal?: boolean,
+  setRefreshing?: (refreshing: boolean) => void
 }
 
 const getStatusStyle = (status: (string | undefined)) => {
@@ -45,6 +50,8 @@ const getStatusTextStyle = (status: (string | undefined)) => {
   }
 }
 
+
+
 const formatDuration = (startTime: (string | undefined), total_duration: (number | undefined)) => {
   if (startTime == null) return ""
   if (total_duration != null) {
@@ -62,13 +69,57 @@ const formatDuration = (startTime: (string | undefined), total_duration: (number
   return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
 }
 
-export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId, currentStatus }) => {
+export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId, currentStatus, personal, setRefreshing }) => {
   const { token } = useAuthStore()
   const [ workout, setWorkout ] = useState<workoutObj|null>(null)
   const [ loading, setLoading ] = useState<boolean>(true)
   const [ activeTab, setActiveTab ] = useState('overview')
 
   const status = currentStatus || workout?.status
+
+  const deleteWorkout = async (workoutId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/${workoutId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+
+    } catch (error) {
+      console.log(`Error deleting workout ${error}`)
+      Alert.alert("Error", "Couldn't delete workout")
+    }
+  }
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Delete?", 
+      "Are you sure you want to delete this workout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteWorkout(workoutId)
+            setRefreshing(true)
+          }
+        }
+      ], 
+      { cancelable: false }
+    )
+  }
+  
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -202,6 +253,21 @@ export const RenderWorkout: React.FC<RenderWorkoutProps> = ({ workoutId, current
               {status === 'in-progress' ? '▶️' : status === 'completed' ? '✅' : '⏸️'} {status?.replace('-', ' ')}
             </Text>
           </View>
+          {personal && (
+            <TouchableOpacity
+              onPress={() => {
+                confirmDelete()
+              }}
+              style={workoutPageStyles.trashButton}
+            >
+              <Ionicons
+                name="trash-outline"
+                color={COLORS.red}
+                size={20}
+              />
+            </TouchableOpacity>
+          )}
+          
         </View>
       </View>
 

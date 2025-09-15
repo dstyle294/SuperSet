@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.textSecondary,
     flex: 1,
-    marginRight: 12,
   },
   statusBadge: {
     paddingHorizontal: 12,

@@ -361,6 +361,16 @@ const styles = StyleSheet.create({
   },
   addSetButtonText: {
     color: COLORS.placeholderText,
+  },
+  trashButton: {
+    marginLeft: 10,
+    borderWidth: 3,
+    borderColor: COLORS.red, 
+    borderRadius: 15,
+    height: 30,
+    width: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 })
 

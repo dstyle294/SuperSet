@@ -1,6 +1,6 @@
 import { workoutObj } from "@/app/types/workout.types"
 import { useEffect, useState } from "react"
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native"
 import homeStyles from '@/assets/styles/home.styles'
 import styles from "@/assets/styles/workoutPage.styles"
 import COLORS from "@/constants/colors"
@@ -33,6 +33,10 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
   const [ hasMore, setHasMore ] = useState(true) 
   const [ loading, setLoading ] = useState(false)
   const [ page, setPage ] = useState(0)
+
+  useEffect(() => {
+    getWorkouts(1, refreshing)
+  }, [refreshing])
   
 
   const updateWorkoutInList = (workoutId: string, updates: Partial<workoutObj>) => {
@@ -84,6 +88,7 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
     }
   }
 
+
   const renderWorkout = ({ item } : { item: workoutObj }) => {
     const getCurrentStatus = () => {
       if (item._id === workoutId && isWorkoutActive) {
@@ -96,7 +101,6 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
 
     return (
       <View style={homeStyles.postCard}>
-        
 
         {currentStatus === 'in-progress' ? (
           <TouchableOpacity
@@ -131,7 +135,7 @@ export const RenderPastWorkouts: React.FC<RenderPastWorkoutsProps> = ({ workoutI
         ) : (
           null
         )}
-        <RenderWorkout workoutId={item._id} currentStatus={currentStatus} />
+        <RenderWorkout workoutId={item._id} currentStatus={currentStatus} personal={true} setRefreshing={setRefreshing} />
       </View>
     )
   }
