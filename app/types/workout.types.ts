@@ -13,7 +13,7 @@ export interface exerciseObj {
   order: Number,
   sets: workoutSet[],
   notes: String,
-  added_at: {type: Date, default: null},
+  added_at: Date,
   _id: string,
 }
 
