@@ -1,5 +1,5 @@
 // styles/create.styles.js
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import COLORS from "../../constants/colors";
 
 const styles = StyleSheet.create({
@@ -69,6 +69,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     color: COLORS.textDark,
+    ...Platform.select({
+      ios: { paddingTop: 16 },
+      android: {textAlignVertical: "center" } 
+    })
   },
   textArea: {
     backgroundColor: COLORS.inputBackground,

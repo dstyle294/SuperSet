@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import styles from '@/assets/styles/home.styles'
@@ -151,6 +151,14 @@ export default function Home() {
           hasMore && posts.length > 0 ? (
             <ActivityIndicator style={styles.footerLoader} size="small" color={COLORS.primary} />
           ) : null
+        }
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing}
+            onRefresh={() => fetchPosts(1, true)}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
         }
       />
     </View>
