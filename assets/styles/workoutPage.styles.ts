@@ -175,15 +175,23 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     flex: 1,
   },
-  closeButton: {
+  headerButton: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.white,
-    borderColor: COLORS.red,
     width: 24,
     height: 24,
     borderRadius: 16,
     borderWidth: 2
+  },
+  footerButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    width: 48,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
   },
   modalInputBox: {
     borderWidth: 1,
@@ -256,7 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   exerciseCard: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: COLORS.background,
     borderRadius: 12,
@@ -270,6 +278,9 @@ const styles = StyleSheet.create({
   },
   exerciseInfo: {
     flex: 1,
+  },
+  selectedExerciseCard: {
+    backgroundColor: COLORS.green,
   },
 })
 

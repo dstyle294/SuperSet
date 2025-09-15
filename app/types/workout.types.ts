@@ -24,7 +24,6 @@ export interface exerciseFromSearchObj {
   instructions: string[],
   name: string,
   secondaryMuscles: string[],
-  target: string,
   gifUrl: string,
   targetMuscles: string[],
 }
