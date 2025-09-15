@@ -32,7 +32,9 @@ export default function Exercises() {
   const [ gifLoading, setGifLoading ] = useState(false)
   const [ refreshing, setRefreshing ] = useState(false)
 
-  
+  useEffect(() => {
+    searchExercises(1, "", false) // fetch page 1 with empty query
+  }, [])
 
   useEffect(() => {
     const fetchExercise = async () => {
@@ -45,24 +47,8 @@ export default function Exercises() {
     fetchExercise()
   }, [informationId])
   
-  const getAllExercises = async () => {
-    try {
-      const response = await fetch(`${API_URL}/exercises`, {
-        method: 'GET'
-      })
 
-      const data = await response.json()
 
-      if (!response.ok) throw new Error(data.message || "Something went wrong")
-      console.log(data)
-      return data.exercises
-    } catch (error) {
-      console.log(`Error fetching exercises ${error}`)
-      Alert.alert("Error", `Couldn't fetch exercises ${error}`)
-    }
-  }
-
-  const allExercises = getAllExercises()
 
   const timeoutRef = useRef<number | null>(null)
 
@@ -115,20 +101,17 @@ export default function Exercises() {
   }
 
   const searchExercises = async (pageNum = 1, query: string, searchRefreshing = false) => {
+    let url = `${API_URL}/exercises/name/${query}?page=${pageNum}`
+
     if (!query.trim()) {
-      setSearchResults([])
-      setIsSearching(false)
-      setSearchPage(1)
-      setSearchHasMore(false)
-      setSearchLoading(false)
-      return ;
+      url = `${API_URL}/exercises?page=${pageNum}`
     }
 
     setIsSearching(true)
     setSearchLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/exercises/name/${query}?page=${pageNum}`, {
+      const response = await fetch(url, {
           method: 'GET',
         }
       )
@@ -213,7 +196,7 @@ export default function Exercises() {
     
     <SafeAreaProvider>
       <SafeScreen>
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { maxWidth: "100%" }]}>
           <View style={styles.modalInputBox}>
             <TextInput  
               style={styles.modalInput}
@@ -223,7 +206,7 @@ export default function Exercises() {
               autoFocus
             />
           </View>
-          {searchQuery.length > 0 ? (
+          {searchQuery.length >= 0 ? (
             <FlatList 
               data={searchResults}
               renderItem={renderExerciseInSearch}
@@ -348,6 +331,7 @@ export default function Exercises() {
             </View>
           </View>
         </Modal>
+
       </SafeScreen>
     </SafeAreaProvider>
 
