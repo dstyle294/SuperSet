@@ -5,8 +5,9 @@ import { API_URL } from "@/constants/api"
 import { formatTime } from "@/lib/utils"
 import { useAuthStore } from "@/store/authStore"
 import { useEffect, useState } from "react"
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Alert, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { RenderAddExercise } from "./RenderAddExercise"
+import Loader from "./loader"
 
 interface RenderActiveWorkoutTabProps {
   workoutId: string,
@@ -17,6 +18,8 @@ interface RenderActiveWorkoutTabProps {
   setPaused: (paused: boolean) => void,
   refreshing: boolean,
   setRefreshing: (paused: boolean) => void,
+  shouldResume: boolean, 
+  setShouldResume: (resume: boolean) => void
 }
 
 export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ workoutId, setWorkoutId, isWorkoutActive, setIsWorkoutActive, paused, setPaused, refreshing, setRefreshing, shouldResume, setShouldResume }) => {
@@ -68,6 +71,9 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
 
   const getWorkoutById = async (workoutId: string) => {
     try {
+      if (!workoutId) {
+        return 
+      }
       const response = await fetch(`${API_URL}/workouts/${workoutId}`, {
         method: 'GET',
         headers: {
@@ -81,9 +87,10 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
         throw new Error(data.message || "Something went wrong")
       }
 
-      setWorkoutTitle(data.title)
-      setWorkoutTime((new Date().getTime() - new Date(data.start_time).getTime() - data.total_pause_time) / 1000)
-      setExercises(data.exercises)
+      console.log(data)
+      setWorkoutTitle(data.workout.title)
+      setWorkoutTime((new Date().getTime() - new Date(data.workout.start_time).getTime() - data.workout.total_pause_time) / 1000)
+      setExercises(data.workout.exercises)
 
     } catch (error) {
       console.log(`Error fetching workout ${error}`)
@@ -240,107 +247,114 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     )
   }
 
+  if (isWorkoutActive && workoutId && !workoutTitle) {
+    return <Loader size="medium" /> // Show loader until workout data is loaded
+  }
+
   return (
-    !isWorkoutActive ? (
-      <View style={styles.startWorkoutContainer}>
-        <Text style={styles.startWorkoutTitle}>Ready to crush it?</Text>
-        <TouchableOpacity onPress={startWorkout} style={styles.startButton}>
-          <Text style={styles.startButtonText}>🔥 Start workout!</Text>
-        </TouchableOpacity>
-      </View>
-    ) : (
-      <View style={styles.activeWorkoutContainer}>
-        <View style={styles.workoutHeader}>
-          <TouchableOpacity 
-            onPress={() => setIsEditingTitle(true)}
-            style={styles.titleContainer}
-          >
-            {isEditingTitle ? (
-              <TextInput
-                style={styles.titleInput}
-                value={workoutTitle}
-                onChangeText={setWorkoutTitle}
-                onBlur={() => setIsEditingTitle(false)}
-                autoFocus
-              />
-            ) : (
-              <Text style={styles.activeWorkoutTitle}>{workoutTitle}</Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.photoButton}>
-            <Text style={styles.photoButtonText}>📸</Text>
+    <View style={styles.container}>
+      {!isWorkoutActive ? (
+        <View style={styles.startWorkoutContainer}>
+          <Text style={styles.startWorkoutTitle}>Ready to crush it?</Text>
+          <TouchableOpacity onPress={startWorkout} style={styles.startButton}>
+            <Text style={styles.startButtonText}>🔥 Start workout!</Text>
           </TouchableOpacity>
         </View>
-
-        <View style={styles.timerContainer}>
-            <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
-            <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
-              {!paused ? (
-                <>
-                  <Text style={workoutStyles.statusText}>🔴</Text>
-                  <Text style={workoutStyles.statusText}>in progress</Text>
-                </>
+      ) : (
+        <View style={styles.activeWorkoutContainer}>
+          <View style={styles.workoutHeader}>
+            <TouchableOpacity 
+              onPress={() => setIsEditingTitle(true)}
+              style={styles.titleContainer}
+            >
+              {isEditingTitle ? (
+                <TextInput
+                  style={styles.titleInput}
+                  value={workoutTitle}
+                  onChangeText={setWorkoutTitle}
+                  onBlur={() => setIsEditingTitle(false)}
+                  autoFocus
+                />
               ) : (
-                <>
-                  <Text style={workoutStyles.statusText}>⏸️</Text>
-                  <Text style={workoutStyles.statusText}>paused</Text>
-                </>
+                <Text style={styles.activeWorkoutTitle}>{workoutTitle}</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.photoButton}>
+              <Text style={styles.photoButtonText}>📸</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.timerContainer}>
+              <Text style={styles.timerText}>{formatTime(workoutTime)}</Text>
+              <View style={[workoutStyles.statusBadge, { marginRight: 10 }]}>
+                {!paused ? (
+                  <>
+                    <Text style={workoutStyles.statusText}>🔴</Text>
+                    <Text style={workoutStyles.statusText}>in progress</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={workoutStyles.statusText}>⏸️</Text>
+                    <Text style={workoutStyles.statusText}>paused</Text>
+                  </>
+                )}
+                
+              </View>
+          </View>
+
+          <View style={styles.exercisesList}>
+            <FlatList
+              data={exercises}
+              keyExtractor={(item) => item._id}
+              renderItem={renderExercise}
+              showsVerticalScrollIndicator={true}
+            />
+              
+
+            <TouchableOpacity 
+              style={styles.addExerciseButton}
+              onPress={() => setShowAddExercise(true)}
+            >
+              <Text style={styles.addExerciseText}>+ Add Exercise</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.workoutControls}>
+              {!paused ? (
+                <TouchableOpacity
+                  style={styles.pauseButton}
+                  onPress={pauseWorkout}
+                >
+                  <Text style={styles.controlButtonText}>⏸️ Pause</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.resumeButton}
+                  onPress={resumeWorkout}
+                >
+                <Text style={styles.controlButtonText}>▶️ Resume</Text>
+              </TouchableOpacity>
               )}
               
-            </View>
-        </View>
-
-        <ScrollView style={styles.exercisesList}>
-          {exercises?.map((item) => (
-            <View key={item._id}>
-              {renderExercise({ item })}
-            </View>
-          ))}
-            
-
-          <TouchableOpacity 
-            style={styles.addExerciseButton}
-            onPress={() => setShowAddExercise(true)}
-          >
-            <Text style={styles.addExerciseText}>+ Add Exercise</Text>
-          </TouchableOpacity>
-        </ScrollView>
-
-        <View style={styles.workoutControls}>
-            {!paused ? (
               <TouchableOpacity
-                style={styles.pauseButton}
-                onPress={pauseWorkout}
+                style={styles.endButton}
+                onPress={endWorkout}
               >
-                <Text style={styles.controlButtonText}>⏸️ Pause</Text>
+                <Text style={styles.controlButtonText}>🏁 End Workout</Text>
               </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={styles.resumeButton}
-                onPress={resumeWorkout}
-              >
-              <Text style={styles.controlButtonText}>▶️ Resume</Text>
-            </TouchableOpacity>
-            )}
-            
-            <TouchableOpacity
-              style={styles.endButton}
-              onPress={endWorkout}
-            >
-              <Text style={styles.controlButtonText}>🏁 End Workout</Text>
-            </TouchableOpacity>
-            <RenderAddExercise
-               showAddExercise={showAddExercise}
-               setShowAddExercise={setShowAddExercise}
-               refreshing={refreshing} 
-               setRefreshing={setRefreshing} 
-               exercises={exercises}
-               setExercises={setExercises}
-               workoutId={workoutId}
-               setWorkoutId={setWorkoutId}
-            />
+              <RenderAddExercise
+                showAddExercise={showAddExercise}
+                setShowAddExercise={setShowAddExercise}
+                refreshing={refreshing} 
+                setRefreshing={setRefreshing} 
+                exercises={exercises}
+                setExercises={setExercises}
+                workoutId={workoutId}
+                setWorkoutId={setWorkoutId}
+              />
+          </View>
         </View>
-      </View>
-    )
+      )}
+    </View>
   )
 }

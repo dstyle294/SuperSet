@@ -26,22 +26,18 @@ export const RenderWorkoutPage = () => {
     switch (activeTab) {
       case 'workout': 
         return (
-          <View style={[workoutStyles.tabContent, { flexDirection: 'column' }]}>
-            <RenderActiveWorkoutTab workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} paused={paused} setPaused={setPaused} refreshing={refreshing} setRefreshing={setRefreshing} shouldResume={shouldResume} setShouldResume={setShouldResume} />
-          </View>
+          <RenderActiveWorkoutTab workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} paused={paused} setPaused={setPaused} refreshing={refreshing} setRefreshing={setRefreshing} shouldResume={shouldResume} setShouldResume={setShouldResume} />
         )
       case 'history':
         return (
-          <View style={workoutStyles.tabContent}>
-            <RenderPastWorkouts workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} paused={paused} setPaused={setPaused} refreshing={refreshing} setRefreshing={setRefreshing} activeTab={activeTab} setActiveTab={setActiveTab} shouldResume={shouldResume} setShouldResume={setShouldResume}  />
-          </View>
+          <RenderPastWorkouts workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} paused={paused} setPaused={setPaused} refreshing={refreshing} setRefreshing={setRefreshing} activeTab={activeTab} setActiveTab={setActiveTab} shouldResume={shouldResume} setShouldResume={setShouldResume}  />
         )
 
     }
   }
 
   return (
-    <View>
+    <View style={styles.container}>
       <View style={workoutStyles.tabContainer}>
         {['workout', 'history'].map((tab) => (
           <TouchableOpacity
@@ -60,8 +56,6 @@ export const RenderWorkoutPage = () => {
             </Text>
           </TouchableOpacity>
         ))}
-
-        
       </View>
       {renderTabContent()}
     </View>

@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   },
   exercisesList: {
     marginBottom: 20,
-    flexShrink: 1,
+    flex: 1,
   },
   exerciseItem: {
     flexDirection: 'row',
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   workoutControls: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     gap: 12,
   },
   pauseButton: {
