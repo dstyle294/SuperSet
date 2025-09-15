@@ -1,5 +1,5 @@
 import COLORS from "@/constants/colors";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 
 const styles = StyleSheet.create({
@@ -333,11 +333,12 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   setInputBox: {
-    height: 30,
+    height: Platform.OS === 'android' ? 40 : 30,
     width: 100,
     borderRadius: 4,
     borderWidth: 1, 
     textAlign: 'center',
+    alignContent: 'center',
   },
   setMultiply: {
     marginHorizontal: 10,
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   },
   setBox: {
     width: 30,
-    height: 30,
+    height: Platform.OS === 'android' ? 40 : 30,
     borderWidth: 1,
     borderRadius: 4,
     marginLeft: 20,

@@ -8,8 +8,9 @@ type ProtectedRouteProps = React.PropsWithChildren<{}>;
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { token, user, isInitialized, isLoading } = useAuthStore();
 
-  if (!isInitialized || isLoading) {
-    return <Loader size="large" />;
+  console.log(token, user, isInitialized, isLoading)
+  if (isLoading) {
+    return <Loader size="large" />; 
   }
 
   if (!token || !user) {

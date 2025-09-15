@@ -427,6 +427,21 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
 
   const onRepChange = async (reps: number, item: workoutSet, exercise: exerciseObj) => {
     try {
+      const updatedExercises = exercises.map(ex => {
+        if (ex._id === exercise._id) {
+          return {
+            ...ex,
+            sets: ex.sets.map(set => 
+              set._id === item._id 
+                ? { ...set, reps: reps ? Number(reps) : null }
+                : set
+            )
+          }
+        }
+        return ex
+      })
+      setExercises(updatedExercises)
+      
       item.reps = reps
       const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets/${item._id}`, {
         method: 'PATCH',
@@ -450,6 +465,23 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
   
   const onWeightChange = async (weight: number, item: workoutSet, exercise: exerciseObj) => {
     try {
+
+      const updatedExercises = exercises.map(ex => {
+        if (ex._id === exercise._id) {
+          return {
+            ...ex,
+            sets: ex.sets.map(set => 
+              set._id === item._id 
+                ? { ...set, weight: weight ? Number(weight) : null }
+                : set
+            )
+          }
+        }
+        return ex
+      })
+
+      setExercises(updatedExercises)
+
       item.weight = weight
       const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exercise._id}/sets/${item._id}`, {
         method: 'PATCH',

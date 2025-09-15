@@ -7,7 +7,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 
 export default function IndexScreen() {
-
   const { user, token, isLoading, checkAuth, isInitialized } = useAuthStore();
   const [isReady, setIsReady] = useState(false);
 
@@ -32,9 +31,10 @@ export default function IndexScreen() {
   }, []);
 
 
+  console.log(user, token, isReady, isLoading)
 
   useEffect(() => {
-    if (isReady && !isLoading && isInitialized) {
+    if (isReady && !isLoading) {
       // Use requestAnimationFrame to ensure navigation happens after render
       requestAnimationFrame(() => {
         if (user && token) {
@@ -45,6 +45,9 @@ export default function IndexScreen() {
       });
     }
   }, [isReady, isLoading, user, token, isInitialized ]);
+
+  
+
 
 
   // Show loading screen while checking auth

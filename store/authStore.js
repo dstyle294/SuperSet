@@ -15,7 +15,9 @@ export const useAuthStore = create((set) => ({
       if (token) {
         // Validate token and get user data
         const userData = await AsyncStorage.getItem('user');
-        set({ user: userData, token, isLoading: false, isInitialized: true });
+        const user = userData ? JSON.parse(userData) : null;
+
+        set({ user, token, isLoading: false, isInitialized: true });
       } else {
         set({ user: null, token: null, isLoading: false, isInitialized: true });
       }
