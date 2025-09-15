@@ -569,7 +569,7 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
   }
 
   if (isWorkoutActive && workoutId && !workoutTitle) {
-    return <Loader size="medium" /> // Show loader until workout data is loaded
+    return <Loader size="large" /> // Show loader until workout data is loaded
   }
 
   return (
