@@ -4,6 +4,9 @@ import { useAuthStore } from '../../store/authStore'
 import styles from '@/assets/styles/home.styles'
 import { API_URL } from '@/constants/api'
 import { RenderUser } from '@/components/RenderUser'
+import { formatPublishDate } from '../../lib/utils'
+import COLORS from '@/constants/colors'
+import { Ionicons } from '@expo/vector-icons'
 
 interface mediaObj {
   type: string,
@@ -25,6 +28,7 @@ interface postObj {
   likes: string[],
   shares: string[], 
   workout: string,
+  createdAt: string,
 }
 
 interface postOfArray {
@@ -49,7 +53,7 @@ export default function Home() {
       if ( refreshing ) setRefreshing(true);
       else if ( pageNum === 1 ) setLoading(true);
 
-      const response = await fetch(`${API_URL}/posts?page=${pageNum}&limit=20`, {
+      const response = await fetch(`${API_URL}/posts?page=${pageNum}&limit=2`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`
@@ -60,9 +64,16 @@ export default function Home() {
 
       if (!response.ok) throw new Error(data.message || "Failed to fetch posts");
 
-      setPosts((prevPosts) => [...prevPosts, ...data.posts])
+      const uniquePosts = 
+        refreshing || pageNum === 1 
+          ? data.posts
+          : Array.from(new Set([...posts, ...data.posts].map((post) => post._id))).map((id) => 
+            [...posts, ...data.posts].find((post) => post._id === id)
+          )
+        
+      setPosts(uniquePosts)
 
-      setHasMore(data.hasMore)
+      setHasMore(pageNum < data.totalPages)
       setPage(pageNum)
 
     } catch (error) {
@@ -81,7 +92,9 @@ export default function Home() {
   }, [])
 
   const handleLoadMore = async () => {
-
+    if (hasMore && !loading && !refreshing) {
+      await fetchPosts(page + 1)
+    }
   }
 
   const renderItem = ({ item }: {item: postObj}) => ( // flatlist expects function that receives object with item in that object
@@ -98,7 +111,7 @@ export default function Home() {
 
       <View style={styles.postDetails}>
         <Text style={styles.postTitle}>{item.caption}</Text>
-        
+          <Text style={styles.date}>Shared on {formatPublishDate(item.created_at)}</Text>
       </View>
 
     </View>
@@ -113,6 +126,20 @@ export default function Home() {
         keyExtractor={(item: postObj) => item._id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>SuperSet 🚀</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="barbell-outline" size={60} color={COLORS.textSecondary} />
+            <Text style={styles.emptyText}>No posts yet 😞</Text>
+            <Text style={styles.emptySubtext}>Be the first to share a post!</Text>
+          </View>
+        }
       />
     </View>
   )
