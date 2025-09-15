@@ -1,6 +1,14 @@
-# Welcome to your Expo app 👋
+# SuperSet: The new way to workout
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+It's not just a workout tracker. It's also:
+* Social media platform with **personalized posts** from friends
+* Interactive exercise repository, with **detailed instructions and embedded GiFs**
+* Workout sharing platform, allowing you to copy your friend's workouts'
+* And much more (soon 🙏)
+
+
+
+This is an [Expo](https://expo.dev) project created with React Native/TypeScript used for the frontend, and Javascript/Node.js for the [backend](https://github.com/dstyle294/SuperSetBackend). 
 
 ## Get started
 
@@ -34,17 +42,3 @@ npm run reset-project
 ```
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
