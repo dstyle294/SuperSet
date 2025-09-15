@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/authStore"
 import { useState } from "react"
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { RenderActiveWorkoutTab } from "./RenderActiveWorkoutTab"
+import { RenderPastWorkouts } from "./RenderPastWorkouts"
 
 // interface RenderWorkoutPageProps = {
 
@@ -14,22 +15,22 @@ import { RenderActiveWorkoutTab } from "./RenderActiveWorkoutTab"
 // :React.FC<RenderWorkoutPageProps>
 export const RenderWorkoutPage = () => {
   
-
   const [ activeTab, setActiveTab ] = useState('workout')
+  const [ workoutId, setWorkoutId ] = useState("")
+  const [ isWorkoutActive, setIsWorkoutActive ] = useState(false) 
   
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'workout': 
         return (
           <View style={[workoutStyles.tabContent, { flexDirection: 'column' }]}>
-            <RenderActiveWorkoutTab />
+            <RenderActiveWorkoutTab workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} />
           </View>
         )
       case 'history':
         return (
           <View style={workoutStyles.tabContent}>
-            
+            <RenderPastWorkouts workoutId={workoutId} setWorkoutId={setWorkoutId} isWorkoutActive={isWorkoutActive} setIsWorkoutActive={setIsWorkoutActive} />
           </View>
         )
 
