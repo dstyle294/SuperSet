@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.textPrimary,
     marginBottom: 8,
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 14,
@@ -136,6 +137,32 @@ const styles = StyleSheet.create({
   buttonIcon: {
     marginRight: 8,
   },
+  dropdown: {
+    height: 50,
+    borderColor: COLORS.border,
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  itemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.inputBackground,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 12,
+  },
+  itemTitle: {
+    flex: 1,
+    height: 48,
+    color: COLORS.textDark,
+  },
+  itemSubDetail: {
+    flex: 0.5,
+    height: 48,
+    color: COLORS.textSecondary,
+  }
 });
 
 export default styles;
