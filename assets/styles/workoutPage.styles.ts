@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: COLORS.textDark,
     marginBottom: 5,
+    flex: 1, 
   },
   exerciseDetails: {
     fontSize: 14,
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
   },
   exerciseCard: {
     flexDirection: 'column',
-    alignItems: 'center',
+    // alignItems: 'center',
     backgroundColor: COLORS.background,
     borderRadius: 12,
     padding: 16,
