@@ -239,7 +239,7 @@ export default function Workout() {
         sets: [],
         name: newExerciseName,
         order: exercises.length + 1,
-        added_at: new Date(),
+        updated_at: new Date(),
         notes: "",
         _id: "",
       }
@@ -264,7 +264,7 @@ export default function Workout() {
         sets: [],
         name: data.exercise.name,
         order: exercises.length + 1,
-        added_at: new Date(),
+        updated_at: new Date(),
         notes: "",
         _id: ""
       }
