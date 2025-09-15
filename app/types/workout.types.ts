@@ -8,7 +8,7 @@ export interface workoutSet {
 }
 
 export interface exerciseObj {
-  api_exercise_id: string,
+  exerciseId: string,
   name: string,
   order: Number,
   sets: workoutSet[],

@@ -28,7 +28,7 @@ export default function Workout() {
   const [ isEditingTitle, setIsEditingTitle ] = useState(false)
   const [ workoutTitle, setWorkoutTitle ] = useState("")
   const [ workoutTime, setWorkoutTime ] = useState(0)
-  const [ exercises, setExercises ] = useState<exerciseFromSearchObj[]>([])
+  const [ exercises, setExercises ] = useState<exerciseObj[]>([])
   const [ showAddExercise, setShowAddExercise ] = useState(false)
   const [ newExerciseName, setNewExerciseName ] = useState("")
   const [ searchQuery, setSearchQuery ] = useState("")
@@ -235,13 +235,13 @@ export default function Workout() {
   const addNewExercise = async () => {
     if (newExerciseName.trim()) {
       const newExercise = {
-        api_exercise_id: "0001",
+        exerciseId: "0001",
         sets: [],
-        _id: "Date.now()",
         name: newExerciseName,
         order: exercises.length + 1,
         added_at: new Date(),
         notes: "",
+        _id: "",
       }
       setExercises([...exercises, newExercise])
       setNewExerciseName('')
@@ -250,11 +250,46 @@ export default function Workout() {
   }
 
   const addExercise = async () => {
-    const exercise = await fetch(`${API_URL}/exercises/id/${selectedExerciseId}`, {
-      method: 'GET',
-    })
-    setExercises([...exercises, exercise])
-    setShowAddExercise(false)
+    try {
+      const response = await fetch(`${API_URL}/exercises/id/${selectedExerciseId}`, {
+        method: 'GET',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong")
+
+      const exercise = {
+        exerciseId: selectedExerciseId,
+        sets: [],
+        name: data.exercise.name,
+        order: exercises.length + 1,
+        added_at: new Date(),
+        notes: "",
+        _id: ""
+      }
+
+      const addResponse = await fetch(`${API_URL}/workouts/${workoutId}/exercises`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(exercise),
+      })
+
+      console.log(addResponse)
+      const addData = await addResponse.json()
+
+      if (!response.ok) throw new Error(addData.message || "Something went wrong")
+
+      console.log(addData)
+      setExercises([...exercises, addData.exercise])
+      setShowAddExercise(false)
+
+    } catch (error) {
+      console.log(`Error adding exercise ${error}`)
+    }
   }
 
   const pauseWorkout = async () => {
