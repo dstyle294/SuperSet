@@ -6,11 +6,18 @@ import COLORS from '../../constants/colors'
 import * as ImagePicker from 'expo-image-picker'
 import * as FileSystem from 'expo-file-system'
 import { WorkoutDropdown } from '@/components/workoutDropdown'
+import { useAuthStore } from '@/store/authStore'
+import { API_URL } from '@/constants/api'
+import { router } from 'expo-router'
 
 export default function Post() {
   const [caption, setCaption] = useState("")
   const [image, setImage] = useState<string | null>(null) // to display the image/video 
   const [imageBase64, setImageBase64] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [ selectedWorkout, setSelectedWorkout ] = useState("")
+  const {token} = useAuthStore()
+
   // current functionality will only allow one image upload
 
 
@@ -58,6 +65,66 @@ export default function Post() {
     }
   }
 
+  const handleSubmit = async () => {
+    if (!caption) {
+      Alert.alert("Error", "Please fill in caption")
+      return;
+    }
+
+    if (!selectedWorkout) {
+      Alert.alert("Error", "Please fill in workout")
+      return;
+    }
+
+    try {
+      setLoading(true)
+
+      let payload: Record<string, any> = { caption: caption, workout: selectedWorkout };
+
+      if (image) {
+        const uriParts = image.split(".")
+        const fileType = uriParts[uriParts.length - 1]
+        const imageType = fileType ? `image/${fileType.toLowerCase()}` : "image/jpeg"
+
+        const imageDataUrl = `data:${imageType};base64,${imageBase64}`
+
+        payload.image =  {
+          type: 'image',
+          url: imageDataUrl,
+        } 
+      } 
+
+      const response = await fetch(`${API_URL}/posts`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || "Something went wrong")
+      
+      Alert.alert("Success", "Your post has been posted!")
+
+      setCaption("")
+      setImage(null)
+      setImageBase64(null)
+      setSelectedWorkout("")
+      router.push("/")
+      
+    } catch (error) {
+      console.error("Error creating post:", error)
+      if (error instanceof Error) {
+        Alert.alert("Error", error.message)
+      } else {
+        Alert.alert("Error", "Something went wrong")
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -87,6 +154,7 @@ export default function Post() {
                 placeholderTextColor={COLORS.placeholderText}
                 value={caption}
                 onChangeText={setCaption}
+                multiline
               />
             </View>
           </View>
@@ -109,8 +177,28 @@ export default function Post() {
           {/* WORKOUT */}
           <View style={styles.formGroup}>
             <Text style={styles.label}>Choose workout 🏋️ </Text>
-            <WorkoutDropdown />
+            <WorkoutDropdown 
+              selectedWorkout={selectedWorkout}
+              onWorkoutChange={setSelectedWorkout}
+            />
           </View>
+
+          {/* POST */}
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <>
+                <Ionicons 
+                  name="cloud-upload-outline"
+                  size={20}
+                  color={COLORS.white}
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonText}>Post</Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
