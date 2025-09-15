@@ -148,6 +148,27 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
     }
   }
 
+  const deleteWorkout = async (workoutId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/workouts/${workoutId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Something went wrong")
+      }
+
+    } catch (error) {
+      console.log(`Error deleting workout ${error}`)
+      Alert.alert("Error", "Couldn't delete workout")
+    }
+  }
+
   const deleteSet = async (exerciseId: string, setId: string) => {
     try {
       const response = await fetch(`${API_URL}/workouts/${workoutId}/exercises/${exerciseId}/sets/${setId}`, {
@@ -213,6 +234,33 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
             try {
               await deleteSet(exerciseId, setId)
               await getWorkoutById(workoutId, true)
+            } finally {
+              setRefreshing(false)
+            }
+          } 
+        }
+      ], 
+      { cancelable: false }
+    )
+  }
+
+  const confirmCancelWorkout = () => {
+    Alert.alert(
+      "Delete?", 
+      "Are you sure you want to cancel this workout?",
+      [ 
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setRefreshing(true)
+            try {
+              await deleteWorkout(workoutId)
+              setIsWorkoutActive(false)
             } finally {
               setRefreshing(false)
             }
@@ -552,8 +600,11 @@ export const RenderActiveWorkoutTab: React.FC<RenderActiveWorkoutTabProps> = ({ 
                 <Text style={styles.activeWorkoutTitle}>{workoutTitle}</Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.photoButton}>
+            {/* <TouchableOpacity style={styles.photoButton}>
               <Text style={styles.photoButtonText}>📸</Text>
+            </TouchableOpacity> */}
+            <TouchableOpacity style={styles.photoButton} onPress={confirmCancelWorkout}>
+              <Ionicons name="close-sharp" color={COLORS.red} size={30}/>
             </TouchableOpacity>
           </View>
 

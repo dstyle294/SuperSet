@@ -40,6 +40,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  workoutHeaderButtons: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
   titleContainer: {
     // flex: 1,
     justifyContent: 'center',
