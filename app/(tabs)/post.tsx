@@ -25,7 +25,7 @@ export default function Post() {
   const pickImage = async () => {
     try {
       if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync()
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
         if (status !== 'granted') {
           Alert.alert("Permission denied", "We need camera roll permissions to upload an image")
           return
@@ -42,21 +42,12 @@ export default function Post() {
       })
 
       if (!result.canceled) {
-        console.log(result)
         setImage(result.assets[0].uri)
 
         // if base64 is provided, use it
-
+        // convert to base64
         if (result.assets[0].base64) {
           setImageBase64(result.assets[0].base64)
-        } else {
-          // convert to base64
-          const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri,
-            {
-              encoding: FileSystem.EncodingType.Base64,
-            }
-          )
-          setImageBase64(base64)
         }
       }
     } catch (error) {
@@ -65,7 +56,26 @@ export default function Post() {
     }
   }
 
+  const uploadImage = async (imageUrl: string) => {
+    const formData = new FormData()
+    formData.append('file', imageUrl)
+    formData.append('upload_preset', 'mobile-app-uploads')
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/dkxvq9kuy/image/upload`, 
+      {
+        method: 'POST',
+        body: formData,
+      }
+    )
+    console.log(response)
+
+    const data = await response.json()
+    return data.secure_url
+  }
+
   const handleSubmit = async () => {
+    
     if (!caption) {
       Alert.alert("Error", "Please fill in caption")
       return;
@@ -75,11 +85,13 @@ export default function Post() {
       Alert.alert("Error", "Please fill in workout")
       return;
     }
-
     try {
       setLoading(true)
 
+      
       let payload: Record<string, any> = { caption: caption, workout: selectedWorkout };
+      // console.log(payload)
+      
 
       if (image) {
         const uriParts = image.split(".")
@@ -88,12 +100,15 @@ export default function Post() {
 
         const imageDataUrl = `data:${imageType};base64,${imageBase64}`
 
-        payload.image =  {
-          type: 'image',
-          url: imageDataUrl,
-        } 
-      } 
+        const imageUrl = await uploadImage(imageDataUrl)
 
+        payload.media =  [{
+          type: 'image',
+          url: imageUrl,
+        }] 
+      } 
+      // console.log(payload)
+      
       const response = await fetch(`${API_URL}/posts`, {
         method: "POST",
         headers: {
@@ -103,7 +118,9 @@ export default function Post() {
         body: JSON.stringify(payload)
       })
 
+      console.log(response);
       const data = await response.json()
+
       if (!response.ok) throw new Error(data.message || "Something went wrong")
       
       Alert.alert("Success", "Your post has been posted!")
