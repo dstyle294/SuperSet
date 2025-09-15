@@ -3,4 +3,5 @@ export interface profile {
   createdAt: Date,
   updatedAt: Date,
   username: string,
+  profileImage: string,
 }
