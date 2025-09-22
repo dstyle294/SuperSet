@@ -10,8 +10,22 @@ interface RenderExerciseInSearchProps {
   setInformationId: (exerciseId: string) => void,
 }
 
-const capitalizeFirstLetter = (exerciseName: string) => {
-  return exerciseName.charAt(0).toUpperCase() + exerciseName.slice(1)
+const capitalizeWords = (exerciseName: string) => {
+  const words = exerciseName.split(" ")
+
+  let string = ""
+  const commonWords = ["on", "of", "with", "and", "to"]
+  
+  words.forEach(word => {
+    if (!commonWords.includes(word)) {
+      string += word.charAt(0).toUpperCase() + word.slice(1)
+    } else {
+      string += word
+    }
+    string += " "
+  })
+
+  return string.slice(0, -1)
 }
 
 
@@ -19,7 +33,7 @@ export const RenderExerciseInSearch: React.FC<RenderExerciseInSearchProps> = ( {
   return (
     <View style={[styles.exerciseCard, isSelected && styles.selectedExerciseCard]}>
       <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-        <Text style={styles.exerciseName} numberOfLines={1} ellipsizeMode="tail" >{capitalizeFirstLetter(exercise.name)}</Text>
+        <Text style={styles.exerciseName} numberOfLines={1} ellipsizeMode="tail" >{capitalizeWords(exercise.name)}</Text>
         <Ionicons
           name="information"
           size={22}

@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import styles from '@/assets/styles/profile.styles'
 import { profile } from '@/assets/types/profile.types'
@@ -7,7 +7,7 @@ import { API_URL } from '@/constants/api'
 import Loader from '@/components/loader'
 import { DetailRow } from '@/components/DetailRow'
 import { formatMemberSince } from '@/lib/utils'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 
 export default function Profile() {
   const { logout, token } = useAuthStore()
@@ -15,9 +15,11 @@ export default function Profile() {
   const [ profile, setProfile ] = useState<profile>()
   const [ loading, setLoading ] = useState(false) 
 
-  useEffect(() => {
-    getAllDetails()
-  }, [token])
+  useFocusEffect(
+    useCallback(() => {
+      getAllDetails();
+    }, [])
+  );
 
   const getAllDetails = async () => {
     try {
