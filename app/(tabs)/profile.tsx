@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import styles from '@/assets/styles/profile.styles'
@@ -9,6 +9,7 @@ import { DetailRow } from '@/components/DetailRow'
 import { formatMemberSince } from '@/lib/utils'
 import { router, useFocusEffect } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import noProfilePic from '@/assets/images/noProfilePic'
 
 export default function Profile() {
   const { logout, token } = useAuthStore()
@@ -61,6 +62,19 @@ export default function Profile() {
 
   if (loading) return ( <Loader size="large" /> )
 
+  // Following count and then list
+  // Followers count and then list
+  // Editable: 
+    // Email
+    // Username
+    // Name
+  // Join date
+  // Posts count and list
+  // Workouts count
+  // Comments count and list
+
+  const profileImage = profile?.profileImage 
+
   return (
     <View style={styles.container}>
       <View style={styles.profileHeader}>
@@ -88,10 +102,16 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
       </View>
-      
+      <View style={styles.profileDetails}>
+          {isEditing ? (
+            <Image source={{uri: profileImage}} style={styles.profileImage}/>
+          ) : (
+            <Image source={{uri: profileImage}} style={styles.profileImage}/>
+          )}
+      </View>
     </View>
   )
-
+}
   // return (
   //   <View style={styles.container}>
   //     <DetailRow
@@ -120,4 +140,4 @@ export default function Profile() {
   //     </TouchableOpacity>
   //   </View>
   // )
-}
+// }

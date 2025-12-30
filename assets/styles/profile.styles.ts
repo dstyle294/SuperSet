@@ -25,6 +25,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  profileDetails: {
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 16,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
   profileIcons: {
     flexDirection: "row",
     shadowColor: COLORS.black,
@@ -48,6 +61,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     marginRight: 16,
+    borderWidth: 1,
   },
   profileInfo: {
     flex: 1,
