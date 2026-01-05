@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ImageBackground } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import styles from '@/assets/styles/profile.styles'
@@ -104,9 +104,13 @@ export default function Profile() {
       </View>
       <View style={styles.profileDetails}>
           {isEditing ? (
-            <Image source={{uri: profileImage}} style={styles.profileImage}/>
+            <TouchableOpacity>
+              <ImageBackground source={{uri: profileImage}} style={styles.profileImage} resizeMode="cover">
+                <View style={styles.imageOverlay} />
+              </ImageBackground>
+            </TouchableOpacity>
           ) : (
-            <Image source={{uri: profileImage}} style={styles.profileImage}/>
+            <ImageBackground source={{uri: profileImage}} style={styles.profileImage}/>
           )}
       </View>
     </View>

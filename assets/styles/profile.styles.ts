@@ -62,6 +62,11 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginRight: 16,
     borderWidth: 1,
+    overflow: 'hidden',
+  },
+  imageOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   profileInfo: {
     flex: 1,
